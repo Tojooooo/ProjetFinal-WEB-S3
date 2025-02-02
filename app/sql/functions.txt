@@ -1,0 +1,25 @@
+testConnexion($email, $password)
+testConnexionAdmin($email, $password)
+
+storeUser($name,$phoneNumber,$email, $password)
+
+getProperty($idProperty)
+getAllProperties()
+
+storeNewProperty($type,$nbBedrooms,$dailyRent,$neighbourhood,$description)
+storePictureProperty($idProperty,$nameFile)     //  Ajoute une photo à propriété
+
+deletePictureProperty($idProperty)
+
+updateProperty($idProperty,$type,$nbBedrooms,$dailyRent,$neighbourhood,$description)
+updatePictureProperty($idProperty,$idPropertyPicture)   //  Mets à jour une photo d'une propriété  
+
+checkBooking($idProperty,$startDate,$endDate)   //  Check si la propriété est déjà réservé durant la période
+
+bookProperty($idUser,$idProperty,$startDate,$endDate)   //  Ajoute une réservation 
+
+searchProperties($idTypeProperty,$idNeighbourhood,$nbBedrooms,$minDailyRent,$maxDailyRent)  //  Recherche de propriété(s) à partir de ces informations
+
+
+
+

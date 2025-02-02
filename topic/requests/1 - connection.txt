@@ -1,0 +1,18 @@
+Crée moi une template php pour une page de connexion et d'inscription pour un site d'agence immobilière selon cette table : 
+CREATE TABLE estate_users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(15) NOT NULL
+);
+La connexion doit se faire avec "email" et "password"
+La template doit include la vue pour la page connexion OU inscription en php
+Dans la page connexion, il doit y avoir un lien vers la page de connexion des administrateurs. Ajoute (par include) cette vue pour la connexion admin.
+Voici la table admin : 
+CREATE TABLE estate_admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+Le thème est : Agence immobilière de location saisonnière
