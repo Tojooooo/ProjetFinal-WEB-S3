@@ -17,12 +17,13 @@ use flight\net\Router;
 });*/
 
 
+$CapitauxController = new CapitauxController();
+
 $router->get('/', [ $CapitauxController, 'showFormCapitaux' ]);
 $router->post('/capitauxControl', [ $CapitauxController, 'TraiterInsertionCapitaux' ]); 
 
-$router->get('/login', [ $Welcome_Controller, 'homeLogin' ]); 
-$router->get('/register', [ $Welcome_Controller, 'homeRegister' ]);
-$router->get('/adminConnexion', [ $Welcome_Controller, 'homeAdmin' ]);
+//$router->get('/register', [ $Welcome_Controller, 'homeRegister' ]);
+//$router->get('/adminConnexion', [ $Welcome_Controller, 'homeAdmin' ]);
 
 
 
