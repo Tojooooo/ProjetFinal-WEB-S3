@@ -23,7 +23,6 @@ if(function_exists('setlocale') === true) {
 if(empty($app)) {
 	$app = Flight::app();
 }
-$ds = DIRECTORY_SEPARATOR;
 
 // if you want to load classes that have underscores in them, comment out the following line
 // Loader::setV2ClassLoading(false);
@@ -33,7 +32,7 @@ $app->path(__DIR__ . $ds . '..' . $ds . '..');
 $app->path(__DIR__ . $ds . '..' . $ds . 'controllers');
 
 // This is where you can set some flight config variables. 
-$app->set('flight.base_url', '/TP-Real-Estate/'); // if this is in a subdirectory, you'll need to change this
+$app->set('flight.base_url', '/Projet-WEB-S3/'); // if this is in a subdirectory, you'll need to change this
 $app->set('flight.case_sensitive', false); // if you want case sensitive routes, set this to true
 $app->set('flight.log_errors', true); // if you want to log errors, set this to true
 $app->set('flight.handle_errors', false); // if you want flight to handle errors, set this to true, otherwise Tracy will handle them
@@ -70,11 +69,17 @@ if (Debugger::$showBar && php_sapi_name() !== 'cli') {
  */
 return [
 	'database' => [
-		// uncomment the below 4 lines for mysql
+		// uncomment the below 4 lines for mysql localhost
 		 'host' => 'localhost',
-		 'dbname' => 's3final',
+		 'dbname' => 'espece',
 		 'user' => 'root',
 		 'password' => ''
+
+		// uncomment the below 4 lines for mysql ITU server
+		//  'host' => '172.80.237.53',
+		//  'dbname' => 'db_s2_ETU003150',
+		//  'user' => 'ETU003150',
+		//  'password' => 'DKHyjN7n'
 
 		// uncomment the following line for sqlite
 		// 'file_path' => __DIR__ . $ds . '..' . $ds . 'database.sqlite'
