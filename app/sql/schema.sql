@@ -1,1 +1,1 @@
-Tsy haiko aloha fa test
+CREATE TABLE
