@@ -13,8 +13,8 @@ INSERT INTO elevage_alimentation (nom, prix, pourcentage_gain) VALUES
 ('Pain', 0.80, 1.20);
 
 -- Association des espèces aux types d'alimentation
-INSERT INTO elevage_alimentation_espece (id_espece, id_alimentation, pourcentage_gain) VALUES
-(1, 1, 1.50), -- Boeuf mange Herbe
-(2, 2, 2.00), -- Porc mange Grain
-(3, 3, 3.00), -- Poule mange Farine animale
-(4, 4, 1.20); -- Canard mange Pain
+INSERT INTO elevage_alimentation_espece (id_espece, id_alimentation) VALUES
+(1, 1), -- Boeuf mange Herbe
+(2, 2), -- Porc mange Grain
+(3, 3), -- Poule mange Farine animale
+(4, 4); -- Canard mange Pain
