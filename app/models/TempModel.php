@@ -15,7 +15,6 @@
 
         public function InsertionCapitaux($data) {
             try {
-                $data_mouvement = date('Y-m-d');
                 $query = "INSERT INTO elevage_mouvement_capitaux (montant, data_mouvement) VALUES (:montant, :data_mouvement)";
                 $stmt = $this->db->prepare($query);
                 
@@ -51,6 +50,7 @@ public function GetCapitalActuel() {
     
     return ($capitalMouvement - $achatAnimal - $alimentAchat) + $venteAnimal;
 }
+
 
         public function NourirAnimal($idEspece, $poids, $nbAnimal) {
             $date = date('Y-m-d');
