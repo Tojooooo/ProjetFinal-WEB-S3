@@ -33,6 +33,7 @@ CREATE TABLE elevage_alimentation_espece (
 CREATE TABLE elevage_achat_animal (
     id_achat_animal INT AUTO_INCREMENT PRIMARY KEY,
     id_espece INT NOT NULL,
+    poids DECIMAL(10, 2) NOT NULL,
     prix_unitaire DECIMAL(10,2) NOT NULL,
     date_achat DATE NOT NULL,
     poids DECIMAL(10,2) NOT NULL ,
