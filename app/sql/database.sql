@@ -1,8 +1,10 @@
 CREATE DATABASE elevage;
 USE elevage;
 
-CREATE TABLE elevage_capitale (
-    capitale DECIMAL(10, 2)
+CREATE TABLE elevage_mouvement_capitaux (
+    id_mouvement_capitaux INT AUTO_INCREMENT PRIMARY KEY,
+    montant DECIMAL(10, 2),
+    data_mouvement DATE
 );
 
 CREATE TABLE elevage_espece (
@@ -20,12 +22,11 @@ CREATE TABLE elevage_alimentation (
     nom VARCHAR(100) NOT NULL,
     prix DECIMAL(10, 2) NOT NULL,
     pourcentage_gain DECIMAL(5, 2)
-);
+); 
 
 CREATE TABLE elevage_alimentation_espece (
     id_espece INT AUTO_INCREMENT PRIMARY KEY,
     id_alimentation INT NOT NULL,
-    pourcentage_gain DECIMAL(5,2) NOT NULL,
     FOREIGN KEY (id_alimentation) REFERENCES elevage_alimentation(id_alimentation)
 );
 
@@ -59,3 +60,4 @@ CREATE TABLE elevage_nourrissage (
     date_nourrissage DATE NOT NULL,
     FOREIGN KEY (id_achat_animal) REFERENCES elevage_achat_animal(id_achat_animal)
 );
+

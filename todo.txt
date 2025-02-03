@@ -1,0 +1,25 @@
+En principe:
+function InsertionCapitaux($montant); // inserer dans la table mouvementCapitaux
+function CapitalActuel(); // à partir des tables mouvement de capitaux, les achats, ventes faits
+function NourirAnimal($idEspece, $poids, $nbAnimal); // nourrit les nbAnimal premiers animaux de cette espece depuis la table achat et insertion dans la table nourrissage
+function AcheterAnimaux($data); // inserer dans la table achat à laquelle $data contient toutes les valeurs à insérer
+function VenteAnimaux($nbAnimaux, $espece, $poids); // vend les nbAnimaux premiers animaux de la table achat qui correspondent au poids et à l'espèce
+function AcheterAlimentation($idAlimentation); // insertion dans la table achat alimentation
+function CalculAugmentationPoids($date, $idAnimal); // poids de l'animal de la table achat animal avec tous les nourrissages de cet animal. NB: A chaque nourrissage, le poids de l'animal augmente du pourcentage de gain de son alimentation
+function GetAlimentActuel($date); // Retourne le reste d'alimentation à date donnée à partir de la table achat alimentation et nourrissage
+
+Tableau de bord:
+Quantite sakafo
+Reste Capitaux
+Etat des animaux($poids,ect...)
+
+Page:
+*VerssementCapitaux.html
+->
+*Acceuil.html
+->Lien (Page d acceuil):
+*Achat.html[Achat (alimentation et animaux)]
+*Vente.html(Animaux)
+*TableDeBord(AJAX){InsererDate}
+
+TODO
