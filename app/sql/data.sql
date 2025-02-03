@@ -1,47 +1,20 @@
--- Données pour estate_admins
-INSERT INTO estate_admins (email, password)
-VALUES
-('admin1@example.com', 'motdepasse123'),
-('admin2@example.com', 'adminpass456');
+-- Insertion des espèces
+INSERT INTO elevage_espece (nom, poids_min_vente, prix_vente_kg, poids_max, jours_sans_manger, perte_poids_par_jour_sans_manger) VALUES
+('Boeuf', 300.00, 5.50, 800.00, 7, 2.00),
+('Porc', 100.00, 4.00, 300.00, 5, 1.50),
+('Poule', 1.50, 10.00, 5.00, 3, 0.50),
+('Canard', 2.50, 8.00, 6.00, 4, 0.75);
 
--- Données pour estate_users
-INSERT INTO estate_users (email, name, password, phone_number)
-VALUES
-('utilisateur1@example.com', 'Jean Dupont', 'motdepasse123', '0612345678'),
-('utilisateur2@example.com', 'Marie Curie', 'userpass456', '0698765432');
+-- Insertion des types d'alimentation
+INSERT INTO elevage_alimentation (nom, prix, pourcentage_gain) VALUES
+('Herbe', 1.00, 1.50),
+('Grain', 2.50, 2.00),
+('Farine animale', 3.00, 3.00),
+('Pain', 0.80, 1.20);
 
--- Données pour estate_property_type
-INSERT INTO estate_property_type (type)
-VALUES
-('Appartement'),
-('Maison'),
-('Villa');
-
--- Données pour estate_property_neighbourhood
-INSERT INTO estate_property_neighbourhood (neighbourhood)
-VALUES
-('Faravohitra'),
-('Ivandry'),
-('Mantansoa');
-
--- Données pour estate_properties
-INSERT INTO estate_properties (id_type_property, id_neighbourhood, bedrooms, daily_rent, description)
-VALUES
-(1, 1, 2, 75.00, 'Un appartement cosy situé au cœur du centre-ville.'),
-(2, 2, 3, 100.00, 'Une maison spacieuse dans une zone résidentielle calme avec un joli jardin.'),
-(3, 3, 4, 250.00, 'Une villa de luxe située dans un quartier paisible en bord de mer avec une vue imprenable.');
-
--- Données pour estate_property_pictures
--- À adapter avec vos fichiers réels
-INSERT INTO estate_property_pictures (id_property, file)
-VALUES
-(1, 'appartement_centre_ville.jpg'),
-(2, 'maison_zone_residentielle.jpg'),
-(3, 'villa_bord_de_mer.jpg');
-
--- Données pour estate_bookings
-INSERT INTO estate_bookings (id_property, id_user, start_date, end_date)
-VALUES
-(1, 1, '2025-02-01', '2025-02-10'),
-(2, 2, '2025-02-15', '2025-02-20'),
-(3, 1, '2025-03-01', '2025-03-10');
+-- Association des espèces aux types d'alimentation
+INSERT INTO elevage_alimentation_espece (id_espece, id_alimentation, pourcentage_gain) VALUES
+(1, 1, 1.50), -- Boeuf mange Herbe
+(2, 2, 2.00), -- Porc mange Grain
+(3, 3, 3.00), -- Poule mange Farine animale
+(4, 4, 1.20); -- Canard mange Pain
