@@ -23,6 +23,7 @@ if(function_exists('setlocale') === true) {
 if(empty($app)) {
 	$app = Flight::app();
 }
+$ds = DIRECTORY_SEPARATOR;
 
 // if you want to load classes that have underscores in them, comment out the following line
 // Loader::setV2ClassLoading(false);
@@ -70,8 +71,8 @@ if (Debugger::$showBar && php_sapi_name() !== 'cli') {
 return [
 	'database' => [
 		// uncomment the below 4 lines for mysql
-		 'host' => 'TP_real_estate',
-		 'dbname' => 'TP_christmasGifts',
+		 'host' => 'localhost',
+		 'dbname' => 's3final',
 		 'user' => 'root',
 		 'password' => ''
 
