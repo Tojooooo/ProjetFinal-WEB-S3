@@ -6,6 +6,17 @@
     <title>Document</title>
 </head>
 <body>
-    toto outskssss
+    <form action="<?php echo Flight::get('flight.base_url'); ?>/capitauxControl" method="post">
+        Elevage:
+        <br><br>
+    Date:
+    <input type="text" name="data_mouvement">
+    <br>
+    <br>
+    Montant:
+    <input type="number" name="montant">
+    <br><br>
+    <input type="submit" value="Valideo">
+    </form>
 </body>
 </html>

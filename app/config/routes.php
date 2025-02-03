@@ -16,14 +16,12 @@ use flight\net\Router;
 	$app->render('welcome', [ 'message' => 'It works!!' ]);
 });*/
 
-
 $CapitauxController = new CapitauxController();
 
 $router->get('/', [ $CapitauxController, 'showFormCapitaux' ]);
 $router->post('/capitauxControl', [ $CapitauxController, 'TraiterInsertionCapitaux' ]); 
+$router->get('/accueil',[$CapitauxController,'showPageAcceuil']);
 
-//$router->get('/register', [ $Welcome_Controller, 'homeRegister' ]);
-//$router->get('/adminConnexion', [ $Welcome_Controller, 'homeAdmin' ]);
 
 
 
