@@ -35,6 +35,7 @@ CREATE TABLE elevage_achat_animal (
     id_espece INT NOT NULL,
     prix_unitaire DECIMAL(10,2) NOT NULL,
     date_achat DATE NOT NULL,
+    poids DECIMAL(10,2) NOT NULL ,
     FOREIGN KEY (id_espece) REFERENCES elevage_espece(id_espece)
 );
 

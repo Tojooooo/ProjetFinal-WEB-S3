@@ -47,25 +47,28 @@
             return $capitalMovement - $animalPurchases - $feedPurchases + $animalSales;
         }
 
-        public function NourirAnimal($idEspece, $poids, $nbAnimal) {
-            $date = date('Y-m-d');
-            
+        public function NourirAnimal($idEspece, $poids, $nbAnimal,$date) {
+
             // Get animals of the specified species
             $stmt = $this->db->prepare("SELECT id_achat_animal FROM elevage_achat_animal 
-                               WHERE id_espece = :idEspece ORDER BY date_achat LIMIT :nbAnimal");
-            $stmt->bindParam(':idEspece', $idEspece, PDO::PARAM_INT);
-            $stmt->bindParam(':nbAnimal', $nbAnimal, PDO::PARAM_INT);
-            $stmt->execute();
+                               WHERE id_espece = :idEspece AND poids = :poids ORDER BY date_achat");
+//            $stmt->bindParam(':idEspece', $idEspece, PDO::PARAM_INT);
+//            $stmt->bindParam(':nbAnimal', $nbAnimal, PDO::PARAM_INT);
+//            $stmt->bindParam(':poids', $poids, PDO::PARAM_INT);
+
+            $stmt->execute([
+                ':idEspece' => $idEspece,
+                ':poids' => $poids
+            ]);
             $animals = $stmt->fetchAll(PDO::FETCH_COLUMN);
-            
+            try{
+                $animals = array_slice($animals, 0, $nbAnimal);
+            }
+            catch (\Exception $e ){
+
+            }
+
             // Find matching feed for the species
-            $stmt = $this->db->prepare("SELECT id_alimentation, pourcentage_gain 
-                               FROM elevage_alimentation_espece 
-                               WHERE id_espece = :idEspece");
-            $stmt->bindParam(':idEspece', $idEspece, PDO::PARAM_INT);
-            $stmt->execute();
-            $feedInfo = $stmt->fetch(PDO::FETCH_ASSOC);
-            
             // Insert feeding records
             $insertStmt = $this->db->prepare("INSERT INTO elevage_nourrissage 
                                    (id_achat_animal, date_nourrissage) VALUES (:animalId, :date)");
@@ -140,6 +143,7 @@
             return $totalSales;
         }
     
+        //Mety
         public function AcheterAlimentation($idAlimentation, $quantite) {
             $date = date('Y-m-d');
             
