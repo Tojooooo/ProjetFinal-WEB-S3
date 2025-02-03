@@ -3,6 +3,7 @@
     namespace app\models;
 
     use PDO;
+    use DateTime;
 
     class TempModel {
 
@@ -15,6 +16,8 @@
 
         public function InsertionCapitaux($data) {
             try {
+                $data_mouvement = $this->parseUnknownDate($data['data_mouvement']);
+
                 $query = "INSERT INTO elevage_mouvement_capitaux (montant, data_mouvement) VALUES (:montant, :data_mouvement)";
                 $stmt = $this->db->prepare($query);
                 
@@ -26,7 +29,66 @@
                 return false;
             }
         }
+        
+        public function parseUnknownDate($dateString) {
+            $formats = [
+                'Y-m-d',     // 2024-12-12
+                'd/m/Y',     // 12/12/2024
+                'm/d/Y',     // 12/12/2024 (U.S.)
+                'd-m-Y',     // 12-12-2024
+                'Y/m/d',     // 2024/12/12
+                'd F Y',     // 12 December 2024
+                'F d, Y',    // December 12, 2024
+            ];
+            
+            foreach ($formats as $format) {
+                $date = DateTime::createFromFormat($format, $dateString);
+                if ($date) {
+                    return $date->format('Y-m-d'); // Convert to MySQL format
+                }
+            }
+            
+            return false; // No valid format found
+        }
 
+        public function GetPoidsAnimalADate($idAchatAnimal, $date) {
+            $date = $this->parseUnknownDate($date);
+
+            // Find the initial weight of the animal at purchase
+            $stmtInitialWeight = $this->db->prepare("
+                SELECT poids
+                FROM elevage_achat_animal a
+                WHERE a.id_achat_animal = :idAchatAnimal
+            ");
+            $stmtInitialWeight->execute([':idAchatAnimal' => $idAchatAnimal]);
+            $initialWeight = $stmtInitialWeight->fetch(PDO::FETCH_ASSOC)['poids'];
+        
+            // Find all feedings for this animal up to the specified date
+            $stmtFeedings = $this->db->prepare("
+                SELECT a.pourcentage_gain
+                FROM elevage_nourrissage n
+                JOIN elevage_achat_animal aa ON n.id_achat_animal=aa.id_achat_animal
+                JOIN elevage_espece e ON aa.id_espece=aa.id_espece
+                JOIN elevage_alimentation_espece ae ON n.id_achat_animal = e.id_espece
+                JOIN elevage_alimentation a ON ae.id_alimentation=a.id_alimentation
+                WHERE n.id_achat_animal = :idAchatAnimal 
+                AND n.date_nourrissage <= :date
+            ");
+            $stmtFeedings->execute([
+                ':idAchatAnimal' => $idAchatAnimal,
+                ':date' => $date
+            ]);
+            $feedings = $stmtFeedings->fetchAll(PDO::FETCH_ASSOC);
+        
+            // Calculate weight increase
+            $weightIncrease = $initialWeight;
+            foreach ($feedings as $feeding) {
+                $weightIncrease += $weightIncrease * ($feeding['pourcentage_gain'] / 100);
+            }
+        
+            return $weightIncrease;
+        }
+    
     
 public function GetCapitalActuel() {
     
@@ -87,39 +149,35 @@ public function GetCapitalActuel() {
     
 
         public function AcheterAnimaux($data) {
-            $date = date('Y-m-d');
+            $date = $this->parseUnknownDate($data["date"]);
             
             $stmt = $this->db->prepare("INSERT INTO elevage_achat_animal 
-                               (id_espece, prix_unitaire, date_achat) 
-                               VALUES (:idEspece, :prixUnitaire, :dateAchat)");
+                               (id_espece, poids, prix_unitaire, date_achat) 
+                               VALUES (:idEspece, :poids, :prixUnitaire, :dateAchat)");
             
-            $totalachat = 0;
-            foreach ($data as $animal) {
-                $stmt->execute([
-                    ':idEspece' => $animal['id_espece'], 
-                    ':prixUnitaire' => $animal['prix_unitaire'], 
-                    ':dateAchat' => $date
-                ]);
-                $totalachat += $animal['prix_unitaire'];
-            }
+            $stmt->execute([
+                ':idEspece' => $data['id_espece'], 
+                ':poids' => $data['poids'],
+                ':prixUnitaire' => $data['prix_unitaire'], 
+                ':dateAchat' => $date
+            ]);
             
             // Record capital movement
-            $this->InsertionCapitaux(-$totalachat);
             
             return $this->db->lastInsertId();
         }
     
-        public function VenteAnimaux($nbAnimaux, $espece, $poids) {
-            $date = date('Y-m-d');
+        public function VenteAnimaux($nbAnimaux, $idEspece, $poids, $dateVente, $prix) {
+            $date = $this->parseUnknownDate($dateVente);
             
             // Find animals to sell
             $stmt = $this->db->prepare("SELECT a.id_achat_animal, e.prix_vente_kg 
                                FROM elevage_achat_animal a
-                               JOIN elevage_espece e ON a.id_espece = e.id_espece
-                               WHERE a.id_espece = :espece 
+                               WHERE a.id_espece=:espece && a.poids=:poids
                                ORDER BY a.date_achat 
                                LIMIT :nbAnimaux");
-            $stmt->bindParam(':espece', $espece, PDO::PARAM_INT);
+            $stmt->bindParam(':espece', $idEspece, PDO::PARAM_INT);
+            $stmt->bindParam(':poids', $poids, PDO::PARAM_INT);
             $stmt->bindParam(':nbAnimaux', $nbAnimaux, PDO::PARAM_INT);
             $stmt->execute();
             $animalsToSell = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -173,27 +231,42 @@ public function GetCapitalActuel() {
             return $this->db->lastInsertId();
         }
     
-        public function CalculAugmentationPoids($date, $idAnimal) {
-            // Get alimenting records
-            $stmt = $this->db->prepare("SELECT n.date_nourrissage, a.pourcentage_gain 
-                               FROM elevage_nourrissage n
-                               JOIN elevage_alimentation_espece a ON n.id_achat_animal = a.id_espece
-                               WHERE n.id_achat_animal = :idAnimal AND n.date_nourrissage <= :date
-                               ORDER BY n.date_nourrissage");
-            $stmt->execute([
-                ':idAnimal' => $idAnimal,
+        public function CalculAugmentationPoids($date, $idAchatAnimal) {
+            $date = $this->parseUnknownDate($date);
+
+            // Find the initial weight of the animal at purchase
+            $stmtInitialWeight = $this->db->prepare("
+                SELECT poids
+                FROM elevage_achat_animal a
+                WHERE a.id_achat_animal = :idAchatAnimal
+            ");
+            $stmtInitialWeight->execute([':idAchatAnimal' => $idAchatAnimal]);
+            $initialWeight = $stmtInitialWeight->fetch(PDO::FETCH_ASSOC)['poids'];
+        
+            // Find all feedings for this animal up to the specified date
+            $stmtFeedings = $this->db->prepare("
+                SELECT a.pourcentage_gain
+                FROM elevage_nourrissage n
+                JOIN elevage_achat_animal aa ON n.id_achat_animal=aa.id_achat_animal
+                JOIN elevage_espece e ON aa.id_espece=aa.id_espece
+                JOIN elevage_alimentation_espece ae ON n.id_achat_animal = e.id_espece
+                JOIN elevage_alimentation a ON ae.id_alimentation=a.id_alimentation
+                WHERE n.id_achat_animal = :idAchatAnimal 
+                AND n.date_nourrissage <= :date
+            ");
+            $stmtFeedings->execute([
+                ':idAchatAnimal' => $idAchatAnimal,
                 ':date' => $date
             ]);
-            $alimentingRecords = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            
-            $totalWeightIncrease = 0;
-            foreach ($alimentingRecords as $record) {
-                // Placeholder for weight increase calculation
-                $weightIncrease = $record['pourcentage_gain'];
-                $totalWeightIncrease += $weightIncrease;
+            $feedings = $stmtFeedings->fetchAll(PDO::FETCH_ASSOC);
+        
+            // Calculate weight increase
+            $weightIncrease = $initialWeight;
+            foreach ($feedings as $feeding) {
+                $weightIncrease += $weightIncrease * ($feeding['pourcentage_gain'] / 100);
             }
-            
-            return $totalWeightIncrease;
+        
+            return $weightIncrease;
         }
     
         public function GetAlimentActuel($date) {
