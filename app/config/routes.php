@@ -2,6 +2,7 @@
 
 use app\controllers\ApiExampleController;
 use app\controllers\WelcomeController;
+use app\controllers\CapitauxController;
 use flight\Engine;
 use flight\net\Router;
 //use Flight;
@@ -16,13 +17,9 @@ use flight\net\Router;
 });*/
 
 
-$Welcome_Controller = new WelcomeController();
-$router->get('/',function (){
-    Flight::render('test_nourriture');
-});
+$router->get('/', [ $CapitauxController, 'showFormCapitaux' ]);
+$router->post('/capitauxControl', [ $CapitauxController, 'TraiterInsertionCapitaux' ]); 
 
-//$router->get('/', [ $Welcome_Controller, 'homeLogin' ]);
-$router->get('/home', [ $Welcome_Controller, 'home' ]); 
 $router->get('/login', [ $Welcome_Controller, 'homeLogin' ]); 
 $router->get('/register', [ $Welcome_Controller, 'homeRegister' ]);
 $router->get('/adminConnexion', [ $Welcome_Controller, 'homeAdmin' ]);
