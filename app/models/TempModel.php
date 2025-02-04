@@ -4,6 +4,8 @@
 
     use PDO;
     use DateTime;
+    use Exception;
+    use PDOException;
 
     class TempModel {
 
@@ -13,10 +15,39 @@
             $this->db = $db;
         }
 
+        public function GetAllCapitaux() {
+            $stmt = $this->db->prepare("SELECT * FROM elevage_mouvement_capitaux");
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
         public function GetAllEspeces() {
             $stmt = $this->db->prepare("SELECT * FROM elevage_espece");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        function calculPrixEspece(int $idEspece, float $poids) {
+            try {
+                // Préparation de la requête
+                $sql = "SELECT prix_vente_kg, poids_min_vente, poids_max 
+                        FROM elevage_espece 
+                        WHERE id_espece = ".$idEspece;
+                        
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute();
+                
+                // Récupération des données avec vérification explicite
+                $espece = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Calcul du prix
+                $prix = $poids * $espece['prix_vente_kg'];
+                
+                return $prix;
+                
+            } catch (PDOException $e) {
+                throw new Exception("Erreur de base de données : " . $e->getMessage());
+            }
         }
 
         public function InsertionCapitaux($data) {
@@ -41,8 +72,14 @@
             $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
 
         
-            $achatstmt = $this->db->query("SELECT SUM(prix_unitaire) as total_animal_achat FROM elevage_achat_animal");
-            $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
+            $achatstmt = $this->db->query("
+                SELECT e.prix_vente_kg, aa.poids as total_animal_achat FROM elevage_achat_animal aa
+                JOIN elevage_espece e ON e.id_espece=aa.id_espece
+            ");
+            $achatAnimal = 0;
+            while ( $data = $achatstmt->fetch(PDO::FETCH_ASSOC)) {
+                $achatAnimal += $data["prix_vente_kg"]*$data["poids"];
+            }
 
 
             $alimentationstmt = $this->db->query("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
@@ -58,7 +95,54 @@
             return ($capitalMouvement - $achatAnimal - $alimentAchat) + $venteAnimal;
         }
 
+        public function getNombreAnimauxAchetes(string $date): int {
+            try {
+                $date = $this->parseUnknownDate($date);
+                $sql = "SELECT COUNT(*) FROM elevage_achat_animal WHERE date_achat <= :date";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':date', $date, PDO::PARAM_STR);
+                $stmt->execute();
+                
+                return (int) $stmt->fetchColumn();
+            } catch (PDOException $e) {
+                throw new Exception("Erreur lors de la récupération du nombre d'animaux élevés : " . $e->getMessage());
+            }
+        }
+        
+        function getNombreAnimauxVendus(string $date): int {
+            try {
+                $sql = "SELECT COUNT(*) FROM elevage_vente_animal WHERE date_vente <= :date";
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':date', $date, PDO::PARAM_STR);
+                $stmt->execute();
+                
+                return (int) $stmt->fetchColumn();
+            } catch (PDOException $e) {
+                throw new Exception("Erreur lors de la récupération du nombre d'animaux vendus : " . $e->getMessage());
+            }
+        }
+        
+        function getNombreAnimauxParEspece(string $date): array {
+            try {
+                $sql = "SELECT e.nom, COUNT(a.id_achat_animal) AS nombre
+                        FROM elevage_achat_animal a
+                        JOIN elevage_espece e ON a.id_espece = e.id_espece
+                        WHERE a.date_achat <= :date
+                        GROUP BY e.nom
+                        ORDER BY nombre DESC";
+        
+                $stmt = $this->db->prepare($sql);
+                $stmt->bindParam(':date', $date, PDO::PARAM_STR);
+                $stmt->execute();
+        
+                return $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } catch (PDOException $e) {
+                throw new Exception("Erreur lors de la récupération des animaux par espèce : " . $e->getMessage());
+            }
+        }        
+
         public function GetCapitalSurDate($date) {
+            $date = $this->parseUnknownDate($date);
             // Capital des mouvements jusqu'à la date donnée
             $capitalStmt = $this->db->prepare("SELECT SUM(montant) as total_capital 
                                               FROM elevage_mouvement_capitaux 
@@ -68,12 +152,15 @@
             $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
         
             // Achats d'animaux jusqu'à la date donnée
-            $achatstmt = $this->db->prepare("SELECT SUM(prix_unitaire) as total_animal_achat 
-                                            FROM elevage_achat_animal 
-                                            WHERE date_achat <= :date");
+            $achatstmt = $this->db->prepare("SELECT e.prix_vente_kg, aa.poids FROM elevage_achat_animal aa
+                                    JOIN elevage_espece e ON e.id_espece=aa.id_espece
+                                    WHERE aa.date_achat <= :date");
             $achatstmt->bindParam(':date', $date);
             $achatstmt->execute();
-            $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
+            $achatAnimal = 0;
+            while($data = $achatstmt->fetch(PDO::FETCH_ASSOC)) {
+                $achatAnimal += $data["prix_vente_kg"]*$data["poids"];
+            }
         
             // Achats d'aliments jusqu'à la date donnée
             $alimentationstmt = $this->db->prepare("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
@@ -94,6 +181,12 @@
         
             // Calcul du capital total
             return ($capitalMouvement - $achatAnimal - $alimentAchat) + $venteAnimal;
+        }
+
+        public function NombreAnimauxPossedes($date)
+        {
+            $date = $this->parseUnknownDate($date);
+            
         }
 
         public function parseUnknownDate($dateString) {
@@ -198,18 +291,16 @@
             
             $stmt = $this->db->prepare("INSERT INTO elevage_achat_animal 
                                (id_espece, poids, prix_unitaire, date_achat) 
-                               VALUES (:idEspece, :poids, :prixUnitaire, :dateAchat)");
+                               VALUES (:idEspece, :poids, 0, :dateAchat)");
             
-            $stmt->execute([
-                ':idEspece' => $data['id_espece'], 
-                ':poids' => $data['poids'],
-                ':prixUnitaire' => $data['prix_unitaire'], 
-                ':dateAchat' => $date
-            ]);
+            for ($i = 0; $i < $data["quantite"]; $i++) {
+                $stmt->execute([
+                    ':idEspece' => $data['id_espece'], 
+                    ':poids' => $data['poids'],
+                    ':dateAchat' => $date
+                ]);
+            }
             
-            // Record capital movement
-            
-            return $this->db->lastInsertId();
         }
     
         public function VenteAnimaux($nbAnimaux, $idEspece, $poids, $dateVente, $prix) {
@@ -265,14 +356,14 @@
         public function AcheterAlimentation($id_alimentation,$quantite,$date_achat,$data_mouvement) {
             try {
                 $alimentPrice = $this->recupPrixAliments($id_alimentation);
-                $totalCost = $alimentPrice * $data['quantite'];
-                $argentActuel = $this->GetCapitalSurDate($date);
+                $totalCost = $alimentPrice * $quantite;
+                $argentActuel = $this->GetCapitalSurDate($date_achat);
 
                 if ($argentActuel < $totalCost) {
                     return false;
                 }
         
-                $date_achat = $this->parseUnknownDate($date_mouvement);
+                $date_achat = $this->parseUnknownDate($data_mouvement);
                 
                 $stmt = $this->db->prepare("INSERT INTO elevage_achat_alimentation 
                     (id_alimentation, date_achat, quantite) 
@@ -353,6 +444,100 @@
             $stmt = $this->db->prepare("SELECT DISTINCT poids FROM elevage_achat_animal WHERE id_espece = :idEspece");
             $stmt->execute([':idEspece' => $idEspece]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
+
+        public function getSoldPercentage(string $date): float {
+            $date = $this->parseUnknownDate($date);
+            $stmt = $this->db->prepare("
+                SELECT 
+                    (SELECT COUNT(*) 
+                     FROM elevage_vente_animal ev
+                     JOIN elevage_achat_animal aa ON ev.id_achat_animal = aa.id_achat_animal
+                     WHERE ev.date_vente <= :date) * 100.0 /
+                    (SELECT COUNT(*) 
+                     FROM elevage_achat_animal
+                     WHERE date_achat <= :date) as percentage
+            ");
+            $stmt->execute(['date' => $date]);
+            $result = $stmt->fetch(PDO::FETCH_ASSOC);
+            
+            return $result['percentage'] ?? 0.0;
+        }
+
+        public function getDeathPercentage(string $date): float {
+            $date = $this->parseUnknownDate($date);
+            // Récupérer tous les animaux achetés avant la date donnée
+            $stmt = $this->db->prepare("
+                SELECT aa.id_achat_animal, aa.date_achat, e.jours_sans_manger, 
+                       e.perte_poids_par_jour_sans_manger, aa.poids,
+                       e.poids_max, aa.id_espece
+                FROM elevage_achat_animal aa
+                JOIN elevage_espece e ON aa.id_espece = e.id_espece
+                WHERE aa.date_achat <= :date
+            ");
+            $stmt->execute(['date' => $date]);
+            $animals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            
+            if (empty($animals)) {
+                return 0.0;
+            }
+            
+            $totalAnimals = count($animals);
+            $deadAnimals = 0;
+            
+            foreach ($animals as $animal) {
+                // Vérifier si l'animal a été vendu avant la date
+                $stmt = $this->db->prepare("
+                    SELECT COUNT(*) as vendu
+                    FROM elevage_vente_animal
+                    WHERE id_achat_animal = :id AND date_vente <= :date
+                ");
+                $stmt->execute([
+                    'id' => $animal['id_achat_animal'],
+                    'date' => $date
+                ]);
+                $sold = $stmt->fetch(PDO::FETCH_ASSOC)['vendu'] > 0;
+                
+                if (!$sold) {
+                    // Calculer les jours consécutifs sans manger
+                    $currentDate = $animal['date_achat'];
+                    $daysWithoutFood = 0;
+                    $currentWeight = $animal['poids'];
+                    
+                    while ($currentDate <= $date) {
+                        // Vérifier s'il y a eu de l'alimentation ce jour
+                        $stmt = $this->db->prepare("
+                            SELECT SUM(aa.quantite) as stock_total
+                            FROM elevage_achat_alimentation aa
+                            JOIN elevage_alimentation_espece ae ON aa.id_alimentation = ae.id_alimentation
+                            WHERE ae.id_espece = :espece
+                            AND aa.date_achat <= :date
+                        ");
+                        $stmt->execute([
+                            'espece' => $animal['id_espece'],
+                            'date' => $currentDate
+                        ]);
+                        $foodAvailable = $stmt->fetch(PDO::FETCH_ASSOC)['stock_total'] > 0;
+                        
+                        if (!$foodAvailable) {
+                            $daysWithoutFood++;
+                            $currentWeight -= $animal['perte_poids_par_jour_sans_manger'];
+                            
+                            // Vérifier si l'animal est mort (plus de jours sans manger que permis ou poids nul)
+                            if ($daysWithoutFood >= $animal['jours_sans_manger'] || $currentWeight <= 0) {
+                                $deadAnimals++;
+                                break;
+                            }
+                        } else {
+                            $daysWithoutFood = 0;
+                        }
+                        
+                        $currentDate = date('Y-m-d', strtotime($currentDate . ' +1 day'));
+                    }
+                }
+            }
+            
+            return ($deadAnimals / $totalAnimals) * 100;
         }
 
     }

@@ -49,12 +49,16 @@ $router->group('/achat', function() use ($router) {
 //     Flight::render('nourrir');
 // });
 
+$router->get('/insererCapital', [ $CapitauxController, 'showFormCapitaux' ]);
 $router->post('/nourrir',[$AlimentationController,'Nourrir']);
 $router->post('/achat/alimentation',[$AlimentationController,'AcheterAlimentation']);
 $router->post('/alimentation',[$AlimentationController,'GetAlimentActuel']);
+$router->get('/dashboard', [ $WelcomeController, 'dashboard' ]);
+$router->post('/rafraichir', [ $WelcomeController, 'refreshDate' ]);
 
 //	Routes des treatments -> ex : /treatment/login
 $router->group('/treatment', function() use ($router) {
+	$CapitauxController = new CapitauxController();
 	$router->group('/achat', function() use ($router) {
 		$AnimauxController = new AnimauxController();
 		$router->post('/animal', [ $AnimauxController, 'acheterAnimal' ]);
@@ -66,4 +70,6 @@ $router->group('/treatment', function() use ($router) {
 		$AlimentationController = new AlimentationController();
 		$router->post('/alimentation', [ $AlimentationController, 'actionAcheterAlimentation' ]);
 	});
+	$CapitauxController = new CapitauxController();
+	$router->post('/insertionCapital', [ $CapitauxController, 'TraiterInsertionCapitaux' ]);
 });

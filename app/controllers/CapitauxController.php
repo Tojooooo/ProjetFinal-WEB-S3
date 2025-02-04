@@ -5,24 +5,15 @@ use Flight;
 
 class CapitauxController {   
     
-    public function __construct()
-    {
-        
-    }
-  
     public function showFormCapitaux() {
-        Flight::render('Verssement.php');
+        Flight::render('form-capital');
     }
 
     public function TraiterInsertionCapitaux() {
         try {
-            $montant = (float)Flight::request()->data->montant;
-            $data_mouvement = Flight::request()->data->data_mouvement;
+            $montant = $_POST["montant"];
+            $data_mouvement = $_POST["date_mouvement"];
             
-            if (empty($montant) || empty($data_mouvement)) {
-                throw new \InvalidArgumentException('Montant et date de mouvement sont requis');
-            }
-
             $data = [
                 'montant' => $montant,
                 'data_mouvement' => $data_mouvement
@@ -32,7 +23,7 @@ class CapitauxController {
             $result = $capitauxModel->InsertionCapitaux($data);
             
             if ($result) {
-                Flight::redirect('/accueil'); 
+                Flight::redirect('/dashboard'); 
             } else {
                 Flight::render('/');
             }

@@ -50,11 +50,6 @@
                             </label>
                             
                             <label>
-                                <input required name="prix_unitaire" type="number" step="0.01" min="0" placeholder="" class="input">
-                                <span>prix unitaire</span>
-                            </label>
-
-                            <label>
                                 <input required name="quantite" type="number" placeholder="" class="input">
                                 <span>quantite</span>
                             </label>
