@@ -16,6 +16,12 @@ class AnimauxController {
         Flight::render('form-achat-animaux');
     }
 
+    
+    public function formulaireAchat2()
+    {
+        Flight::render('form-achat-aliment');
+    }
+
     public function acheterAnimal()
     {
         $capital = Flight::tempModel()->GetCapitalSurDate($_POST["date_achat"]);
@@ -35,6 +41,42 @@ class AnimauxController {
         Flight::tempModel()->acheterAnimaux($data);
     }
 
+    
+    public function venteAnimaux() {
+        try {
+
+            $nbAnimaux = (int)$_POST['nb_animaux'];
+            $idEspece = (int)$_POST['id_espece'];
+            $poids = (float)$_POST['poids'];
+            $dateVente = $_POST['date_vente'];
+            $prix = (float)$_POST['prix_unitaire'];
+
+            if (empty($nbAnimaux) || empty($idEspece) || empty($poids) || empty($dateVente)) {
+                throw new \InvalidArgumentException('Tous les champs sont obligatoires');
+            }
+
+            $tempModel = new TempModel(Flight::db());
+            
+            $totalVente = $tempModel->VenteAnimaux(
+                $nbAnimaux, 
+                $idEspece, 
+                $poids, 
+                $dateVente, 
+                $prix
+            );
+
+            if ($totalVente > 0) {
+                Flight::redirect('/accueil', [
+                ]);
+            } else {
+                Flight::render('/');
+            }
+
+        } catch (\Exception $e) {
+           return false;
+        }
+    }
 }
+
 
 ?>
