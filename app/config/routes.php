@@ -32,11 +32,7 @@ $router->group('/achat', function() use ($router) {
 	$AnimauxController = new AnimauxController();
 	$router->get('/animal', [ $AnimauxController, 'formulaireAchat' ]);
 });
-
-$router->group('/achat', function() use ($router) {
-	$AlimentationController = new AlimentationController();
-	$router->get('/achat', [ $AlimentationController, 'formulaireAchat2' ]);
-});
+//$router->get('/alimentation',[$AnimauxController,'formulaireAchat2']);
 
 // $router->get('/',function (){
 //     Flight::render('test_nourriture');

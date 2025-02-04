@@ -13,10 +13,10 @@ class AlimentationController
     }
     public function Nourrir()
     {
-        $idEspece = $_POST['idEspece'];
-        $poids = $_POST['poids'];
-        $nbAnimal = $_POST['nbAnimal'];
-        $date =  $_POST['date'];
+        $idEspece = $_GET['idEspece'];
+        $poids = $_GET['poids'];
+        $nbAnimal = $_GET['nbAnimal'];
+        $date =  $_GET['date'];
         $alimentationModel = new TempModel(Flight::db());
 
         try {
@@ -29,7 +29,7 @@ class AlimentationController
 
     }
     public function GetAlimentActuel() {
-        $date = $_POST['date'];
+        $date = $_GET['date'];
         $alimentationModel = new TempModel(Flight::db());
 
         try {
@@ -45,9 +45,9 @@ class AlimentationController
     public function acheterAlimentation() {
         try {
             $data = [
-                'id_alimentation' => (int)$_POST['id_alimentation'],
-                'date_achat' => (int)$_POST['date_achat'],
-                'quantite' => (float)$_POST['quantite']
+                'id_alimentation' => (int)$_GET['id_alimentation'],
+                'date_achat' => (int)$_GET['date_achat'],
+                'quantite' => (float)$_GET['quantite']
             ];
 
             if (empty($data['id_alimentation']) || empty($data['quantite'])) {
