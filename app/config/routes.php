@@ -1,9 +1,9 @@
 <?php
 
-use app\controllers\ApiExampleController;
 use app\controllers\WelcomeController;
 use app\controllers\CapitauxController;
 use app\controllers\AlimentationController;
+use app\controllers\AnimauxController;
 use flight\Engine;
 use flight\net\Router;
 //use Flight;
@@ -19,18 +19,18 @@ use flight\net\Router;
 
 $CapitauxController = new CapitauxController();
 $WelcomeController = new WelcomeController();
+$AlimentationController = new AlimentationController();
+$AnimauxController = new AnimauxController();
 
 $router->get('/', [ $WelcomeController, 'dashboard' ]);
 $router->post('/capitauxControl', [ $CapitauxController, 'TraiterInsertionCapitaux' ]); 
 $router->get('/accueil',[$CapitauxController,'showPageAcceuil']);
-$alimentationController = new AlimentationController();
 
 
 //	Routes des formulaire -> ex : /formulaire/login
-$router->group('/formulaire', function() use ($router) {
-	$router->group('/achat', function() use ($router) {
-		$router->get('/animal', [  ]);
-	});
+$router->group('/achat', function() use ($router) {
+	$AnimauxController = new AnimauxController();
+	$router->get('/animal', [ $AnimauxController, 'formulaireAchat' ]);
 });
 
 // $router->get('/',function (){
@@ -41,11 +41,14 @@ $router->group('/formulaire', function() use ($router) {
 //     Flight::render('nourrir');
 // });
 
-$router->post('/nourrir',[$alimentationController,'Nourrir']);
-$router->post('/achat/alimentation',[$alimentationController,'AcheterAlimentation']);
-$router->post('/alimentation',[$alimentationController,'GetAlimentActuel']);
+$router->post('/nourrir',[$AlimentationController,'Nourrir']);
+$router->post('/achat/alimentation',[$AlimentationController,'AcheterAlimentation']);
+$router->post('/alimentation',[$AlimentationController,'GetAlimentActuel']);
 
 //	Routes des treatments -> ex : /treatment/login
 $router->group('/treatment', function() use ($router) {
-
+	$router->group('/achat', function() use ($router) {
+		$AnimauxController = new AnimauxController();
+		$router->post('/animal', [ $AnimauxController, 'acheterAnimal' ]);
+	});
 });

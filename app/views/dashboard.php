@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hybrid Bootstrap Admin Template</title>
+    <title>Accueil Dashboard</title>
     <!-- Bootstrap Styles-->
     <link href="assets/css/bootstrap.css" rel="stylesheet" />
     <!-- FontAwesome Styles-->
@@ -20,57 +20,16 @@
 
 <body>
     <div id="wrapper">
-        <nav class="navbar navbar-default top-navbar" role="navigation">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                <a class="navbar-brand" href="<?= Flight::get('flight.base_url') ?>/"><i class="fa fa-gear"></i> <strong>HYBRID</strong></a>
-            </div>
+        
+        <?php include("frame.php"); ?>
 
-        </nav>
-        <!--/. NAV TOP  -->
-        <nav class="navbar-default navbar-side" role="navigation">
-		<div id="sideNav" href=""><i class="fa fa-caret-right"></i></div>
-            <div class="sidebar-collapse">
-                <ul class="nav" id="main-menu">
-
-                    <li>
-                        <a class="active-menu" href="<?= Flight::get('flight.base_url') ?>/"><i class="fa fa-dashboard"></i> Dashboard</a>
-                    </li>
-                    <li>
-                        <a href="#"><i class="fa fa-desktop"></i>Insérer capitaux</a>
-                    </li>
-                    <li>
-                        <a href="<?= Flight::get('flight.base_url') ?>/possession"><i class="fa fa-qrcode"></i>Espèces possédées</a>
-                    </li>
-                    
-                    <li>
-                        <a href="#"><i class="fa fa-sitemap"></i>Acheter<span class="fa arrow"></span></a>
-                        <ul class="nav nav-second-level">
-                            <li>
-                                <a href="<?= Flight::get('flight.base_url') ?>/achat/animal">animal</a>
-                            </li>
-                            <li>
-                                <a href="<?= Flight::get('flight.base_url') ?>/achat/alimentation">alimentation</a>
-                            </li>
-                        </ul>
-                    </li>
-                </ul>
-
-            </div>
-
-        </nav>
         <!-- /. NAV SIDE  -->
         <div id="page-wrapper">
             <div id="page-inner">
 
 
                 <div class="row">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <h1 class="page-header">
                             Dashboard 
                             
