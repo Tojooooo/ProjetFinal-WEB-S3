@@ -1,6 +1,6 @@
 -------------QUESTION 1,2,3------------------
 
-(modifier) function nourrir($animal) {
+function nourrir($animal) {
     asiana update ny $animal['poids'];
 }
 

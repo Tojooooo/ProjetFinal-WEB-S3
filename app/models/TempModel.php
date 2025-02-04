@@ -250,9 +250,7 @@
             return $totalvente;
         }
 
-        public function VendreAnimal($id_achat_animal) {
 
-        }
         
         public function AcheterAlimentation($data) {
             try {
@@ -356,6 +354,228 @@
             $stmt->execute([':idEspece' => $idEspece]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
         }
+
+        public function GetPourcentageGain($idAchatAnimal) {
+            // Obtenir l'espèce de l'animal
+            $stmt = $this->db->prepare("
+            SELECT e.id_espece
+            FROM elevage_achat_animal a
+            JOIN elevage_espece e ON a.id_espece = e.id_espece
+            WHERE a.id_achat_animal = :idAchatAnimal
+        ");
+            $stmt->execute([':idAchatAnimal' => $idAchatAnimal]);
+            $idEspece = $stmt->fetchColumn();
+
+            // Obtenir le pourcentage de gain pour l'espèce
+            $stmt = $this->db->prepare("
+            SELECT a.pourcentage_gain
+            FROM elevage_alimentation a
+            JOIN elevage_alimentation_espece ae ON a.id_alimentation = ae.id_alimentation
+            WHERE ae.id_espece = :idEspece
+        ");
+            $stmt->execute([':idEspece' => $idEspece]);
+            return $stmt->fetchColumn();
+        }
+
+
+        //////////////// to do 2 /////////////
+        public function Nourrir($animal, $dateNourrissage) {
+            // Obtenir le poids actuel de l'animal à partir de l'objet
+            $poidsActuel = $animal['poids']; // Utiliser le poids de l'objet animal
+
+            // Obtenir le pourcentage de gain
+            $pourcentageGain = $this->GetPourcentageGain($animal['id_achat_animal']); // Utiliser l'ID de l'animal
+
+            // Calculer le nouveau poids
+            $nouveauPoids = $poidsActuel + ($poidsActuel * ($pourcentageGain / 100));
+
+            // Mettre à jour le poids de l'animal
+            $updateStmt = $this->db->prepare("
+            UPDATE elevage_achat_animal
+            SET poids = :nouveauPoids
+            WHERE id_achat_animal = :idAchatAnimal
+        ");
+            $updateStmt->execute([
+                ':nouveauPoids' => $nouveauPoids,
+                ':idAchatAnimal' => $animal['id_achat_animal'] // Utiliser l'ID de l'animal
+            ]);
+
+            // Insérer l'enregistrement de nourrissage
+            $insertStmt = $this->db->prepare("
+            INSERT INTO elevage_nourrissage (id_achat_animal, date_nourrissage)
+            VALUES (:idAchatAnimal, :dateNourrissage)
+        ");
+            $insertStmt->execute([
+                ':idAchatAnimal' => $animal['id_achat_animal'], // Utiliser l'ID de l'animal
+                ':dateNourrissage' => $dateNourrissage
+            ]);
+
+            // Vérifier si la vente est possible après le nourrissage
+            $this->CheckVentePossible($animal); // Passer l'objet animal
+
+            return true; // ou retourner le nouveau poids si nécessaire
+        }
+
+        public function GetAnimauxNonVendus() {
+
+            // Récupérer les identifiants des animaux non vendus
+            $stmt = $this->db->prepare("
+            SELECT id_achat_animal 
+            FROM elevage_achat_animal a
+            WHERE a.id_achat_animal NOT IN (SELECT v.id_achat_animal FROM elevage_vente_animal v)
+        ");
+            $stmt->execute();
+            $nonVendusIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+            echo count($nonVendusIds);
+
+            // Récupérer les détails de chaque animal non vendu
+            $animauxNonVendus = [];
+            foreach ($nonVendusIds as $idAnimal) {
+                $animauxNonVendus[] = $this->GetAnimalById($idAnimal);
+
+            }
+            echo count($animauxNonVendus);
+
+//            var_dump($animauxNonVendus);
+//            echo "\nIo\n";
+            return $animauxNonVendus;
+        }
+
+        public function GetAnimalById($idAnimal) {
+            // Préparer la requête pour récupérer les détails de l'animal
+            $stmt = $this->db->prepare("
+            SELECT a.*, e.nom AS nom_espece
+            FROM elevage_achat_animal a
+            JOIN elevage_espece e ON a.id_espece = e.id_espece
+            WHERE a.id_achat_animal = :idAnimal
+        ");
+
+            // Exécuter la requête
+            $stmt->execute([':idAnimal' => $idAnimal]);
+
+            // Récupérer les résultats
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+
+        public function NourrirAnimauxAuto($poidsAliments) {
+            $allAnimaux = $this->GetAnimauxNonVendus();
+            var_dump($allAnimaux); // Vérifiez le contenu
+
+            if ($this->ampy($poidsAliments, $allAnimaux)) {
+                foreach ($allAnimaux as $animal) {
+                    var_dump($animal); // Vérifiez le contenu de chaque animal
+                    try {
+                        $this->Nourrir($animal, date('Y-m-d')); // Date actuelle
+                    } catch (\Exception $e) {
+                        echo 'Erreur lors de la nourrissage: ' . $e->getMessage();
+                    }
+                }
+            } else {
+                $animaux = $this->GetBestAnimalsToFeed($poidsAliments, $allAnimaux);
+                var_dump($animaux); // Vérifiez le contenu
+
+                foreach ($animaux as $animal) {
+                    try {
+                        $this->Nourrir($animal, date('Y-m-d')); // Date actuelle
+                    } catch (\Exception $e) {
+                        echo 'Erreur lors de la nourrissage: ' . $e->getMessage();
+                    }
+                }
+            }
+        }
+
+        public function ampy($poidsAliments, $animaux) {
+            $sommeNecessaire = 0;
+            foreach ($animaux as $animal) {
+                $sommeNecessaire += $this->GetQuotaPerDayByIdAnimal($animal['id_achat_animal']);
+            }
+            return $sommeNecessaire <= $poidsAliments;
+        }
+
+        public function GetQuotaPerDayByIdAnimal($idAnimal) {
+            $stmt = $this->db->prepare("SELECT quota_journalier FROM elevage_achat_animal WHERE id_achat_animal = :idAnimal");
+            $stmt->execute([':idAnimal' => $idAnimal]);
+            return $stmt->fetchColumn();
+        }
+
+        public function GetBestAnimalsToFeed($poidsAliments, $animaux) {
+            $animauxTries = $this->TrierAnimauxParImportance($animaux);
+            $result = [];
+            $somme = 0;
+
+            foreach ($animauxTries as $animal) {
+                $quota = $this->GetQuotaPerDayByIdAnimal($animal['idAnimal']);
+                if ($somme + $quota <= $poidsAliments) {
+                    $somme += $quota;
+                    $result[] = $animal;
+                }
+            }
+            return $result;
+        }
+
+        public function TrierAnimauxParImportance($listAnimaux) {
+            usort($listAnimaux, function($a, $b) {
+                return $this->GetPoidsRestantAvantVente($a) <=> $this->GetPoidsRestantAvantVente($b);
+            });
+            return $listAnimaux;
+        }
+
+        public function GetPoidsRestantAvantVente($animal) {
+            $poidsActuel = $animal['poids']; // Assurez-vous que le poids est inclus dans les données de l'animal
+            $poidsMinimalDeVente = $this->GetPoidsMinimalDevente($animal['id_espece']);
+            return $poidsActuel - $poidsMinimalDeVente;
+        }
+
+        public function GetPoidsMinimalDevente($idEspece) {
+            $stmt = $this->db->prepare("SELECT poids_min_vente FROM elevage_espece WHERE id_espece = :idEspece");
+            $stmt->execute([':idEspece' => $idEspece]);
+            return $stmt->fetchColumn();
+        }
+
+/////////////////////////// to do 3 /////////////////////////////////
+
+        public function Vendre($animal, $dateVente) {
+            if (!$this->estVivant($animal)) {
+                return;
+            }
+
+            $stmt = $this->db->prepare("
+            INSERT INTO elevage_vente_animal (id_achat_animal, date_vente, prix_unitaire)
+            VALUES (:idAchatAnimal, :dateVente, :prixUnitaire)
+        ");
+            $stmt->execute([
+                ':idAchatAnimal' => $animal['id_achat_animal'],
+                ':dateVente' => $dateVente,
+                ':prixUnitaire' => $animal['prix_unitaire'] // Assurez-vous que le prix unitaire est disponible
+            ]);
+        }
+
+        public function isAutoVente($animal) {
+            $stmt = $this->db->prepare("SELECT autovente FROM elevage_achat_animal WHERE id_achat_animal = :idAchatAnimal");
+            $stmt->execute([':idAchatAnimal' => $animal['id_achat_animal']]);
+            return (bool)$stmt->fetchColumn();
+        }
+
+        public function CheckVentePossible($animal) {
+            if ($this->isAutoVente($animal) && $this->GetPoidsMinimalDeVente($animal) <= $this->GetPoidsActuel($animal)) {
+                $this->Vendre($animal, date('Y-m-d')); // Date actuelle
+            } else if (!$this->isAutoVente($animal)) {
+//                $this->Vendre($animal, $animal['date_vente']); // Date actuelle
+            }
+        }
+
+        public function estVivant($animal) {
+            $stmt = $this->db->prepare("SELECT estvivant FROM elevage_achat_animal WHERE id_achat_animal = :idAchatAnimal");
+            $stmt->execute([':idAchatAnimal' => $animal['id_achat_animal']]);
+            return (bool)$stmt->fetchColumn();
+        }
+
+        public function GetPoidsActuel($animal) {
+            return $animal['poids'];
+        }
+
 
     }
 

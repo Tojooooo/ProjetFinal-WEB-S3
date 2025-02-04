@@ -36,6 +36,9 @@ CREATE TABLE elevage_achat_animal (
     poids DECIMAL(10, 2) NOT NULL,
     prix_unitaire DECIMAL(10,2) NOT NULL,
     date_achat DATE NOT NULL,
+    quota_journalier DECIMAL(10,2) NOT NULL ,
+    autovente TINYINT(1) NOT NULL DEFAULT 0,
+    estvivant TINYINT(1) NOT NULL DEFAULT 1,
     FOREIGN KEY (id_espece) REFERENCES elevage_espece(id_espece)
 );
 

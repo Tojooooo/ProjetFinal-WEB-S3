@@ -19,9 +19,12 @@ use flight\net\Router;
 
 $CapitauxController = new CapitauxController();
 $WelcomeController = new WelcomeController();
-$AlimentationController = new AlimentationController();
+//$AlimentationController = new AlimentationController();
 $AnimauxController = new AnimauxController();
 
+$router -> get('/nour',function (){
+   Flight::render('nourriture_auto');
+});
 $router->get('/', [ $WelcomeController, 'dashboard' ]);
 $router->post('/capitauxControl', [ $CapitauxController, 'TraiterInsertionCapitaux' ]); 
 $router->get('/accueil',[$CapitauxController,'showPageAcceuil']);
@@ -32,11 +35,11 @@ $router->group('/achat', function() use ($router) {
 	$AnimauxController = new AnimauxController();
 	$router->get('/animal', [ $AnimauxController, 'formulaireAchat' ]);
 });
-
-$router->group('/achat', function() use ($router) {
-	$AlimentationController = new AlimentationController();
-	$router->get('/achat', [ $AlimentationController, 'formulaireAchat2' ]);
-});
+//
+//$router->group('/achat', function() use ($router) {
+//	$AlimentationController = new AlimentationController();
+//	$router->get('/achat', [ $AlimentationController, 'formulaireAchat2' ]);
+//});
 
 // $router->get('/',function (){
 //     Flight::render('test_nourriture');
@@ -46,9 +49,9 @@ $router->group('/achat', function() use ($router) {
 //     Flight::render('nourrir');
 // });
 
-$router->post('/nourrir',[$AlimentationController,'Nourrir']);
-$router->post('/achat/alimentation',[$AlimentationController,'AcheterAlimentation']);
-$router->post('/alimentation',[$AlimentationController,'GetAlimentActuel']);
+//$router->post('/nourrir',[$AlimentationController,'Nourrir']);
+//$router->post('/achat/alimentation',[$AlimentationController,'AcheterAlimentation']);
+//$router->post('/alimentation',[$AlimentationController,'GetAlimentActuel']);
 
 //	Routes des treatments -> ex : /treatment/login
 $router->group('/treatment', function() use ($router) {
