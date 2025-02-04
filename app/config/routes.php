@@ -19,6 +19,8 @@ use flight\net\Router;
 
 $CapitauxController = new CapitauxController();
 $WelcomeController = new WelcomeController();
+
+
 $AlimentationController = new AlimentationController();
 $AnimauxController = new AnimauxController();
 
