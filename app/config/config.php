@@ -72,7 +72,7 @@ return [
 	'database' => [
 		// uncomment the below 4 lines for mysql localhost
 		 'host' => 'localhost',
-		 'dbname' => 's3final',
+		 'dbname' => 'elevage',
 		 'user' => 'root',
 		 'password' => ''
 

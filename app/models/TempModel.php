@@ -7,22 +7,27 @@
 
     class TempModel {
 
-        public $db;
-
+        private $db;
         public function __construct($db)
         {
             $this->db = $db;
         }
 
+        public function GetAllEspeces() {
+            $stmt = $this->db->prepare("SELECT * FROM elevage_espece");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
         public function InsertionCapitaux($data) {
             try {
                 $data_mouvement = $this->parseUnknownDate($data['data_mouvement']);
-
+        
                 $query = "INSERT INTO elevage_mouvement_capitaux (montant, data_mouvement) VALUES (:montant, :data_mouvement)";
                 $stmt = $this->db->prepare($query);
                 
                 return $stmt->execute([
-                    ':montant' => $data['montant'],
+                    ':montant' => (float)$data['montant'], 
                     ':data_mouvement' => $data_mouvement
                 ]);
             } catch (\PDOException $th) {
@@ -30,6 +35,67 @@
             }
         }
         
+        public function GetCapitalActuel() {
+    
+            $capitalStmt = $this->db->query("SELECT SUM(montant) as total_capital FROM elevage_mouvement_capitaux");
+            $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
+
+        
+            $achatstmt = $this->db->query("SELECT SUM(prix_unitaire) as total_animal_achat FROM elevage_achat_animal");
+            $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
+
+
+            $alimentationstmt = $this->db->query("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
+                                    FROM elevage_alimentation a
+                                    JOIN elevage_achat_alimentation b ON a.id_alimentation = b.id_alimentation");
+            $alimentAchat = $alimentationstmt->fetch(PDO::FETCH_ASSOC)['total_aliment_achat'];
+
+            
+            $ventestmt = $this->db->query("SELECT SUM(prix_unitaire) as total_animal_vente FROM elevage_vente_animal");
+            $venteAnimal = $ventestmt->fetch(PDO::FETCH_ASSOC)['total_animal_vente'];
+
+            
+            return ($capitalMouvement - $achatAnimal - $alimentAchat) + $venteAnimal;
+        }
+
+        public function GetCapitalSurDate($date) {
+            // Capital des mouvements jusqu'à la date donnée
+            $capitalStmt = $this->db->prepare("SELECT SUM(montant) as total_capital 
+                                              FROM elevage_mouvement_capitaux 
+                                              WHERE data_mouvement <= :date");
+            $capitalStmt->bindParam(':date', $date);
+            $capitalStmt->execute();
+            $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
+        
+            // Achats d'animaux jusqu'à la date donnée
+            $achatstmt = $this->db->prepare("SELECT SUM(prix_unitaire) as total_animal_achat 
+                                            FROM elevage_achat_animal 
+                                            WHERE date_achat <= :date");
+            $achatstmt->bindParam(':date', $date);
+            $achatstmt->execute();
+            $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
+        
+            // Achats d'aliments jusqu'à la date donnée
+            $alimentationstmt = $this->db->prepare("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
+                                                   FROM elevage_alimentation a
+                                                   JOIN elevage_achat_alimentation b ON a.id_alimentation = b.id_alimentation
+                                                   WHERE b.date_achat <= :date");
+            $alimentationstmt->bindParam(':date', $date);
+            $alimentationstmt->execute();
+            $alimentAchat = $alimentationstmt->fetch(PDO::FETCH_ASSOC)['total_aliment_achat'];
+        
+            // Ventes d'animaux jusqu'à la date donnée
+            $ventestmt = $this->db->prepare("SELECT SUM(prix_unitaire) as total_animal_vente 
+                                            FROM elevage_vente_animal 
+                                            WHERE date_vente <= :date");
+            $ventestmt->bindParam(':date', $date);
+            $ventestmt->execute();
+            $venteAnimal = $ventestmt->fetch(PDO::FETCH_ASSOC)['total_animal_vente'];
+        
+            // Calcul du capital total
+            return ($capitalMouvement - $achatAnimal - $alimentAchat) + $venteAnimal;
+        }
+
         public function parseUnknownDate($dateString) {
             $formats = [
                 'Y-m-d',     // 2024-12-12
@@ -89,29 +155,6 @@
             return $weightIncrease;
         }
     
-    
-public function GetCapitalActuel() {
-    
-    $capitalStmt = $this->db->query("SELECT SUM(montant) as total_capital FROM elevage_mouvement_capitaux");
-    $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
-
-    
-    $achatstmt = $this->db->query("SELECT SUM(prix_unitaire) as total_animal_achat FROM elevage_achat_animal");
-    $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
-
-
-    $alimentationstmt = $this->db->query("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
-                               FROM elevage_alimentation a
-                               JOIN elevage_achat_alimentation b ON a.id_alimentation = b.id_alimentation");
-    $alimentAchat = $alimentationstmt->fetch(PDO::FETCH_ASSOC)['total_aliment_achat'];
-
-    
-    $ventestmt = $this->db->query("SELECT SUM(prix_unitaire) as total_animal_vente FROM elevage_vente_animal");
-    $venteAnimal = $ventestmt->fetch(PDO::FETCH_ASSOC)['total_animal_vente'];
-
-    
-    return ($capitalMouvement - $achatAnimal - $alimentAchat) + $venteAnimal;
-}
 
 
         public function NourrirAnimal($idEspece, $poids, $nbAnimal,$date) {
@@ -150,7 +193,6 @@ public function GetCapitalActuel() {
             return count($animals);
         }
     
-
         public function AcheterAnimaux($data) {
             $date = $this->parseUnknownDate($data["date"]);
             
@@ -291,10 +333,7 @@ public function GetCapitalActuel() {
             $stmt->execute([':idEspece' => $idEspece]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
-        public function getAllEspeces() {
-            $stmt = $this->db->query("SELECT id_espece, nom FROM elevage_espece");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        }
+        
         public function getDistinctWeightsByEspeceId($idEspece) {
             $stmt = $this->db->prepare("SELECT DISTINCT poids FROM elevage_achat_animal WHERE id_espece = :idEspece");
             $stmt->execute([':idEspece' => $idEspece]);
