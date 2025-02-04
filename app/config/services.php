@@ -4,7 +4,7 @@ use flight\Engine;
 use flight\database\PdoWrapper;
 use flight\debug\database\PdoQueryCapture;
 use Tracy\Debugger;
-use app\models\ProductModel;
+use app\models\TempModel;
 
 /** 
  * @var array $config This comes from the returned array at the bottom of the config.php file
@@ -30,10 +30,6 @@ use app\models\ProductModel;
 
 
 
-Flight::map('productModel', function () {
-    return new ProductModel(Flight::db());
-});
-
-Flight::map('functionsModel', function () {
-    return new FunctionsModel(Flight::db());
+Flight::map('tempModel', function () {
+    return new TempModel(Flight::db());
 });

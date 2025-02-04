@@ -3,7 +3,12 @@ namespace App\Controllers;
 use App\Models\TempModel; 
 use Flight;  
 
-class CapitauxController {        
+class CapitauxController {   
+    
+    public function __construct()
+    {
+        
+    }
   
     public function showFormCapitaux() {
         Flight::render('Verssement.php');
