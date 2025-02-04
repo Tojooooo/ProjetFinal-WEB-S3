@@ -4,6 +4,8 @@
 
     use PDO;
     use DateTime;
+    use Exception;
+    use PDOException;
 
     class TempModel {
 
@@ -17,6 +19,29 @@
             $stmt = $this->db->prepare("SELECT * FROM elevage_espece");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        function calculPrixEspece(int $idEspece, float $poids) {
+            try {
+                // Préparation de la requête
+                $sql = "SELECT prix_vente_kg, poids_min_vente, poids_max 
+                        FROM elevage_espece 
+                        WHERE id_espece = ".$idEspece;
+                        
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute();
+                
+                // Récupération des données avec vérification explicite
+                $espece = $stmt->fetch(PDO::FETCH_ASSOC);
+                
+                // Calcul du prix
+                $prix = $poids * $espece['prix_vente_kg'];
+                
+                return $prix;
+                
+            } catch (PDOException $e) {
+                throw new Exception("Erreur de base de données : " . $e->getMessage());
+            }
         }
 
         public function InsertionCapitaux($data) {
@@ -41,8 +66,14 @@
             $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
 
         
-            $achatstmt = $this->db->query("SELECT SUM(prix_unitaire) as total_animal_achat FROM elevage_achat_animal");
-            $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
+            $achatstmt = $this->db->query("
+                SELECT e.prix_vente_kg, aa.poids as total_animal_achat FROM elevage_achat_animal aa
+                JOIN elevage_espece e ON e.id_espece=aa.id_espece
+            ");
+            $achatAnimal = 0;
+            while ( $data = $achatstmt->fetch(PDO::FETCH_ASSOC)) {
+                $achatAnimal += $data["prix_vente_kg"]*$data["poids"];
+            }
 
 
             $alimentationstmt = $this->db->query("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
@@ -59,6 +90,7 @@
         }
 
         public function GetCapitalSurDate($date) {
+            $date = $this->parseUnknownDate($date);
             // Capital des mouvements jusqu'à la date donnée
             $capitalStmt = $this->db->prepare("SELECT SUM(montant) as total_capital 
                                               FROM elevage_mouvement_capitaux 
@@ -68,12 +100,15 @@
             $capitalMouvement = $capitalStmt->fetch(PDO::FETCH_ASSOC)['total_capital'];
         
             // Achats d'animaux jusqu'à la date donnée
-            $achatstmt = $this->db->prepare("SELECT SUM(prix_unitaire) as total_animal_achat 
-                                            FROM elevage_achat_animal 
-                                            WHERE date_achat <= :date");
+            $achatstmt = $this->db->prepare("SELECT e.prix_vente_kg, aa.poids FROM elevage_achat_animal aa
+                                    JOIN elevage_espece e ON e.id_espece=aa.id_espece
+                                    WHERE aa.date_achat <= :date");
             $achatstmt->bindParam(':date', $date);
             $achatstmt->execute();
-            $achatAnimal = $achatstmt->fetch(PDO::FETCH_ASSOC)['total_animal_achat'];
+            $achatAnimal = 0;
+            while($data = $achatstmt->fetch(PDO::FETCH_ASSOC)) {
+                $achatAnimal += $data["prix_vente_kg"]*$data["poids"];
+            }
         
             // Achats d'aliments jusqu'à la date donnée
             $alimentationstmt = $this->db->prepare("SELECT SUM(a.prix * b.quantite) as total_aliment_achat
@@ -198,18 +233,16 @@
             
             $stmt = $this->db->prepare("INSERT INTO elevage_achat_animal 
                                (id_espece, poids, prix_unitaire, date_achat) 
-                               VALUES (:idEspece, :poids, :prixUnitaire, :dateAchat)");
+                               VALUES (:idEspece, :poids, 0, :dateAchat)");
             
-            $stmt->execute([
-                ':idEspece' => $data['id_espece'], 
-                ':poids' => $data['poids'],
-                ':prixUnitaire' => $data['prix_unitaire'], 
-                ':dateAchat' => $date
-            ]);
+            for ($i = 0; $i < $data["quantite"]; $i++) {
+                $stmt->execute([
+                    ':idEspece' => $data['id_espece'], 
+                    ':poids' => $data['poids'],
+                    ':dateAchat' => $date
+                ]);
+            }
             
-            // Record capital movement
-            
-            return $this->db->lastInsertId();
         }
     
         public function VenteAnimaux($nbAnimaux, $idEspece, $poids, $dateVente, $prix) {

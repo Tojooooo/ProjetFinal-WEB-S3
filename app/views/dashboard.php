@@ -239,6 +239,53 @@
 
     <!-- Dynamic Js loading -->
     <script src="assets/js/dynamic/home-script.js"></script>
+
+    <script>
+        // Fonction pour formater la date en JJ/MM/AA
+        function formatDate(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = String(date.getFullYear()).slice(-2);
+            return `${day}/${month}/${year}`;
+        }
+
+        // Mettre la date actuelle au chargement de la page
+        document.addEventListener('DOMContentLoaded', function() {
+            const today = new Date();
+            document.getElementById('pageDate').textContent = formatDate(today);
+            
+            // Mettre la date actuelle dans l'input date
+            const dateInput = document.querySelector('input[type="date"]');
+            dateInput.valueAsDate = today;
+        });
+
+        // Gérer la soumission du formulaire
+        document.getElementById('dateForm').addEventListener('submit', function(e) {
+            e.preventDefault(); // Empêcher le rechargement de la page
+            
+            const formData = new FormData(this);
+            const selectedDate = new Date(formData.get('date'));
+            
+            // Mettre à jour l'affichage de la date
+            document.getElementById('pageDate').textContent = formatDate(selectedDate);
+            
+            // Envoyer la date au serveur via Ajax
+            fetch('fetch-data-from-date.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Traiter les données reçues du serveur
+                console.log('Données reçues:', data);
+                // Ici vous pouvez ajouter le code pour utiliser les données
+                // Par exemple : mettre à jour d'autres éléments de la page
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+            });
+        });
+    </script>
  
 
 </body>

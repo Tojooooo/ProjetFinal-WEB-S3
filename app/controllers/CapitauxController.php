@@ -5,11 +5,6 @@ use Flight;
 
 class CapitauxController {   
     
-    public function __construct()
-    {
-        
-    }
-  
     public function showFormCapitaux() {
         Flight::render('Verssement.php');
     }
