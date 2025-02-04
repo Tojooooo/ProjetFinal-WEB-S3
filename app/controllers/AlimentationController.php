@@ -13,10 +13,10 @@ class AlimentationController
     }
     public function Nourrir()
     {
-        $idEspece = $_POST['idEspece'];
-        $poids = $_POST['poids'];
-        $nbAnimal = $_POST['nbAnimal'];
-        $date =  $_POST['date'];
+        $idEspece = $_GET['idEspece'];
+        $poids = $_GET['poids'];
+        $nbAnimal = $_GET['nbAnimal'];
+        $date =  $_GET['date'];
         $alimentationModel = new TempModel(Flight::db());
 
         try {
@@ -29,7 +29,7 @@ class AlimentationController
 
     }
     public function GetAlimentActuel() {
-        $date = $_POST['date'];
+        $date = $_GET['date'];
         $alimentationModel = new TempModel(Flight::db());
 
         try {
@@ -41,31 +41,29 @@ class AlimentationController
         }
 
     }
-
-    public function acheterAlimentation() {
+    public function actionAcheterAlimentation()
+    {
         try {
+            $id_alimentation = Flight::request()->data->id_alimentation;
+            $date_achat = Flight::request()->data->date_achat;
+            $quantite = Flight::request()->data->quantite;
+
             $data = [
-                'id_alimentation' => (int)$_POST['id_alimentation'],
-                'date_achat' => (int)$_POST['date_achat'],
-                'quantite' => (float)$_POST['quantite']
+                'id_alimentation' => $id_alimentation,
+                'quantite' => $quantite,
+                'date_achat' => $date_achat
             ];
-
-            if (empty($data['id_alimentation']) || empty($data['quantite'])) {
-                throw new \InvalidArgumentException('Données manquantes');
-            }
-
-            $tempModel = new TempModel(Flight::db());
-            $resultat = $tempModel->AcheterAlimentation($data);
-
-            if ($resultat['success']) {
-                Flight::redirect('/accueil');
+    
+            $elevageModel = new TempModel(Flight::db());
+            $result = $elevageModel-> AcheterAlimentation($id_alimentation,$quantite,$date_achat);
+    
+            if ($result) {
+                Flight::redirect('/achat/alimentation');
             } else {
-                Flight::render('/');
-                 
+                Flight::redirect('/');
             }
-        } catch (\InvalidArgumentException $e) {
-            return false;
-        
+        } catch (\Throwable $th) {
+            Flight::redirect('/');
         }
     }
     }

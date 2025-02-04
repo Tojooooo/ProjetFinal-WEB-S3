@@ -249,46 +249,47 @@
             
             return $totalvente;
         }
-    
+       
+        public function recupPrixAliments($id_alimentation) {
+            
+                $query = "SELECT prix FROM elevage_alimentation WHERE id_alimentation = :id_alimentation";
+                $stmt = $this->db->prepare($query);
+                $stmt ->bindParam(':id_alimentation',$id_alimentation);
+                $stmt ->execute();
+                $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+                return $result ? (float) $result['prix']:0;
+          
+            }
         
-        public function AcheterAlimentation($data) {
-            try {
-                $stmt = $this->db->prepare("SELECT prix FROM elevage_alimentation WHERE id_alimentation = :idAlimentation");
-                $stmt->execute([':idAlimentation' => $data['idAlimentation']]);
-                $alimentPrice = $stmt->fetch(PDO::FETCH_ASSOC)['prix'];
-        
-                $argentActuel = $this->GetCapitalSurDate($data['date']);
-        
-                $totalCost = $alimentPrice * $data['quantite'];
-        
-                if ($argentActuel < $totalCost) {
-                    return [
-                        'success' => false,
-                        'message' => 'Fonds insuffisants',
-                        'capital_actuel' => $argentActuel,
-                        'cout_total' => $totalCost
-                    ];
-                }
-                $data_achat = $this->parseUnknownDate($data['data_mouvement']);
 
+        public function AcheterAlimentation($id_alimentation,$quantite,$date_achat,$data_mouvement) {
+            try {
+                $alimentPrice = $this->recupPrixAliments($id_alimentation);
+                $totalCost = $alimentPrice * $data['quantite'];
+                $argentActuel = $this->GetCapitalSurDate($date);
+
+                if ($argentActuel < $totalCost) {
+                    return false;
+                }
+        
+                $date_achat = $this->parseUnknownDate($date_mouvement);
+                
                 $stmt = $this->db->prepare("INSERT INTO elevage_achat_alimentation 
                     (id_alimentation, date_achat, quantite) 
                     VALUES (:idAlimentation, :dateAchat, :quantite)");
                 
-                $stmt->execute([
-                    ':id_alimentation' => $data['id_alimentation'],
-                    ':date_achat' => $date_achat,
-                    ':quantite' => $data['quantite']
+                 return  $stmt->execute([
+                    ':idAlimentation' => $id_alimentation,
+                    ':dateAchat' => $date_achat,
+                    ':quantite' => $quantite
                 ]);
         
-        
-                return $stmt;
-                   
             } catch (\PDOException $th) {
-                return  false;
-                   
+                return false;                
+             
             }
         }
+
     
         public function CalculAugmentationPoids($date, $idAchatAnimal) {
             $date = $this->parseUnknownDate($date);

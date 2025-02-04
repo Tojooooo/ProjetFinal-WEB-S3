@@ -43,17 +43,9 @@
                                 </select>
                                 <span>select espece</span>
                             </label>
-                                    
-                            <label>
-                                <input required name="nom" type="number" step="0.01" min="0" placeholder="" class="input">
-                                <span>nom aliment</span>
-                            </label>
-                            
-                            <label>
-                                <input required name="prix" type="number" step="0.01" min="0" placeholder="" class="input">
-                                <span>prix unitaire</span>
-                            </label>
-
+                                
+                          
+                        
                             <label>
                                 <input required name="quantite" type="number" placeholder="" class="input">
                                 <span>quantite</span>
