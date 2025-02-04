@@ -150,7 +150,6 @@
             return count($animals);
         }
     
-
         public function AcheterAnimaux($data) {
             $date = $this->parseUnknownDate($data["date"]);
             
