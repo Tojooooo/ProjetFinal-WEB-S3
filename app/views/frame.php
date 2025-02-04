@@ -25,6 +25,9 @@
             <li>
                 <a href="<?= Flight::get('flight.base_url') ?>/possession"><i class="fa fa-qrcode"></i>Espèces possédées</a>
             </li>
+            <li>
+                <a href="<?= Flight::get('flight.base_url') ?>/reinitialiser"><i class="fa fa-qrcode"></i>Reinitialiser</a>
+            </li>
             
             <li>
                 <a href="#"><i class="fa fa-sitemap"></i>Acheter<span class="fa arrow"></span></a>

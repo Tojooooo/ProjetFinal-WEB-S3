@@ -55,6 +55,7 @@ $router->post('/achat/alimentation',[$AlimentationController,'AcheterAlimentatio
 $router->post('/alimentation',[$AlimentationController,'GetAlimentActuel']);
 $router->get('/dashboard', [ $WelcomeController, 'dashboard' ]);
 $router->post('/rafraichir', [ $WelcomeController, 'refreshDate' ]);
+$router->get('/reinitialiser', [ $WelcomeController, 'reinitialiser' ]);
 
 //	Routes des treatments -> ex : /treatment/login
 $router->group('/treatment', function() use ($router) {

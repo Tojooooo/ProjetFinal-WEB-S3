@@ -33,7 +33,7 @@ $app->path(__DIR__ . $ds . '..' . $ds . '..');
 $app->path(__DIR__ . $ds . '..' . $ds . 'controllers');
 
 // This is where you can set some flight config variables. 
-$app->set('flight.base_url', '/ProjetFinal-WEB-S3'); // if this is in a subdirectory, you'll need to change this
+$app->set('flight.base_url', 'http://172.80.237.53/ETU003150/t/ProjetFinal-WEB-S3'); // if this is in a subdirectory, you'll need to change this
 $app->set('flight.case_sensitive', false); // if you want case sensitive routes, set this to true
 $app->set('flight.log_errors', true); // if you want to log errors, set this to true
 $app->set('flight.handle_errors', false); // if you want flight to handle errors, set this to true, otherwise Tracy will handle them
@@ -71,16 +71,16 @@ if (Debugger::$showBar && php_sapi_name() !== 'cli') {
 return [
 	'database' => [
 		// uncomment the below 4 lines for mysql localhost
-		 'host' => 'localhost',
-		 'dbname' => 'elevage',
-		 'user' => 'root',
-		 'password' => ''
+		//  'host' => 'localhost',
+		//  'dbname' => 'elevage',
+		//  'user' => 'root',
+		//  'password' => ''
 
 		// uncomment the below 4 lines for mysql ITU server
-		//  'host' => '172.80.237.53',
-		//  'dbname' => 'db_s2_ETU003150',
-		//  'user' => 'ETU003150',
-		//  'password' => 'DKHyjN7n'
+		 'host' => '172.80.237.53',
+		 'dbname' => 'db_s2_ETU003150',
+		 'user' => 'ETU003150',
+		 'password' => 'DKHyjN7n'
 
 		// uncomment the following line for sqlite
 		// 'file_path' => __DIR__ . $ds . '..' . $ds . 'database.sqlite'

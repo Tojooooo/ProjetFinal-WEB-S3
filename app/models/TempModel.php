@@ -15,6 +15,36 @@
             $this->db = $db;
         }
 
+        function reinitialiserBase() {
+            try {
+                // Définir un tableau des noms des tables à réinitialiser
+                $tables = [
+                    'elevage_mouvement_capitaux',
+                    'elevage_achat_animal',
+                    'elevage_vente_animal',
+                    'elevage_achat_alimentation'
+                ];
+        
+                // Démarrer une transaction
+                $this->db->beginTransaction();
+        
+                // Boucler sur chaque table et supprimer toutes les lignes
+                foreach ($tables as $table) {
+                    $stmt = $this->db->prepare("DELETE FROM $table");
+                    $stmt->execute();
+                }
+        
+                // Valider la transaction
+                $this->db->commit();
+        
+                echo "Toutes les tables ont été réinitialisées avec succès.";
+            } catch (Exception $e) {
+                // En cas d'erreur, annuler la transaction
+                $this->db->rollBack();
+                echo "Erreur lors de la réinitialisation des tables : " . $e->getMessage();
+            }
+        }
+
         public function GetAllCapitaux() {
             $stmt = $this->db->prepare("SELECT * FROM elevage_mouvement_capitaux");
             $stmt->execute();
