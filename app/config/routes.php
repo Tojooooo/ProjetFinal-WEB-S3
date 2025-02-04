@@ -17,9 +17,7 @@ use flight\net\Router;
 
 
 $Welcome_Controller = new WelcomeController();
-$router->get('/',function (){
-    Flight::render('test_nourriture');
-});
+$router->get('/', [ $Welcome_Controller, 'dashboard' ]);
 
 //$router->get('/', [ $Welcome_Controller, 'homeLogin' ]);
 $router->get('/home', [ $Welcome_Controller, 'home' ]); 

@@ -12,6 +12,12 @@ class WelcomeController {
 
 	}
 
+    public function dashboard()
+    {
+        $data = Flight::tempModel()->GetAllEspeces();
+        Flight::render("dashboard", $data);
+    }
+
     public function home()
     {
         Flight::render("home");

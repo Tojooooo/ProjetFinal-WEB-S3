@@ -14,6 +14,12 @@
             $this->db = $db;
         }
 
+        public function GetAllEspeces() {
+            $stmt = $this->db->prepare("SELECT * FROM elevage_espece");
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+
         public function InsertionCapitaux($data) {
             try {
                 $data_mouvement = $this->parseUnknownDate($data['data_mouvement']);
