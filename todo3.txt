@@ -1,0 +1,43 @@
+---------------Question 4,5,7-------------(Ny 6 affichage @ ankapobeny)
+
+NB: marihina fa ny ankamaroa'ny fonction ato dia mila ny argument $animal , kanefa fomba
+fanoratra fotsiny io fa ny tena marina dia argument maro toy ny id , etc toy ity fonction Vendre ity
+
+
+
+//asiana champ autovente ny elevage_achat_animal (izany hoe any @ affichage koa)
+
+function Vendre(id_achat_animal,datevente){
+    INSERT INTO elevage_vente_animal
+}
+
+function isAutoVente($animal){
+    SELECT autovente from elevage_achat_animal WHERE
+}
+
+(modifier) function nourrir($animal){
+
+//aiana hoe CheckVentePossible($animal))
+}
+
+CheckVentePossible($animal){
+
+     if(isAutoVente($animal) && GetPoidsMinimalDeVente($animal)<= GetPoidsActuel($animal)){
+            Vendre ($animal(datevente = now()))
+        }
+       else if(!isAutoVente($animal) $animal['dateVente'] = now()){
+           Vendre ($animal(datevente = now()))
+       }
+}
+
+//asiana champ estvivant ao @ elevage_achat_animal
+
+function estVivant($animal){
+    SELECT estvivant FROM elevage_achat_animal WHERE
+}
+
+(Modifier) Vendre($animal){
+    //Alohan'ny zava-drehetra dia asiana aloha hoe
+    if(!estVivant)return;
+}
+

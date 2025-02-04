@@ -212,7 +212,7 @@
             return $this->db->lastInsertId();
         }
     
-        public function VenteAnimaux($nbAnimaux, $idEspece, $poids, $dateVente, $prix) {
+        public function VenteAnimaux($nbAnimaux, $idEspece, $poids, $dateVente) {
             $date = $this->parseUnknownDate($dateVente);
             
             // Find animals to sell
@@ -249,7 +249,10 @@
             
             return $totalvente;
         }
-    
+
+        public function VendreAnimal($id_achat_animal) {
+
+        }
         
         public function AcheterAlimentation($data) {
             try {
@@ -277,7 +280,7 @@
                 
                 $stmt->execute([
                     ':id_alimentation' => $data['id_alimentation'],
-                    ':date_achat' => $date_achat,
+                    ':date_achat' => $data_achat,
                     ':quantite' => $data['quantite']
                 ]);
         

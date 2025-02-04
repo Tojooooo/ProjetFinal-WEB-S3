@@ -49,7 +49,7 @@ class AnimauxController {
             $idEspece = (int)$_POST['id_espece'];
             $poids = (float)$_POST['poids'];
             $dateVente = $_POST['date_vente'];
-            $prix = (float)$_POST['prix_unitaire'];
+//            $prix = (float)$_POST['prix_unitaire'];
 
             if (empty($nbAnimaux) || empty($idEspece) || empty($poids) || empty($dateVente)) {
                 throw new \InvalidArgumentException('Tous les champs sont obligatoires');
@@ -61,8 +61,7 @@ class AnimauxController {
                 $nbAnimaux, 
                 $idEspece, 
                 $poids, 
-                $dateVente, 
-                $prix
+                $dateVente,
             );
 
             if ($totalVente > 0) {
