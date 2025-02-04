@@ -1,0 +1,59 @@
+-------------QUESTION 1,2,3------------------
+
+(modifier) function nourrir($animal) {
+    asiana update ny $animal['poids'];
+}
+
+
+function GetAnimauxNonVendus(){
+    SELECT id_achat_animal as idAnimal FROM elevage_achat_animal a
+    WHERE a.id_achat_animal NOT IN (SELECT id_achat_animal FROM elevage_vente_animal)
+
+    return GetAnimalById((each idAnimal));
+}
+
+function NourrirAnimauxAuto(){
+    $allAnimaux = GetAnimauxNonVendus()
+    if(ampy(sakafo,$allAnimaux) ->nourrir tous les animaux)
+    else($animaux = GetBestAnimalsToFeed($poidsAliments,$animaux) , nourrir $animaux)
+}
+
+function ampy($poidsAliments,$animaux){
+    $sommeNecessaire = 0;
+    foreach ($animaux as $animal){
+        $sommeNecessaire += GetQuotaPerDayByIdAnimal($animal['idAnimal'])
+    }
+    return $sommeNecessaire <= $poidsAlments
+}
+
+GetQuotaPerDayByIdAnimal($idAnimal){
+    //Alaina avy anaty base
+}
+
+GetBestAnimalsToFeed($poidsAliments,$animaux){
+    $animauxTries = TrierAnimauxParImportance($animaux);
+    $result = array();
+    $a = 0;
+    $somme = 0;
+    for($i=0;$i<count($animauxTries);$i++){
+        if($aliment = GetQuotaPerDayByIdAnimal($animauxTries[$i]['idAnimal']) <= $poidsAliments){
+            $somme+=$aliment;
+            $result[$a] = $animauxTries[$i];
+            $a++;
+        }
+    }
+    return $result;
+}
+
+TrierAnimauxParImportance($listAnimaux){
+    $result = [];
+    $tab = array();
+
+    //jerena ny GetPoidsRestantAvantVente($animal)
+    //trier ces poids par ordre croissant (meme negatif)
+    et l'ordre final correspondra a cet ordre
+}
+
+GetPoidsRestantAvantVente($animal){
+    GetPoidsActuel - GetPoidsMinimalDevente($animal['id_espece']);
+}
