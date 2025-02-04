@@ -1,7 +1,7 @@
 <?php
 
 use app\controllers\ApiExampleController;
-use app\controllers\WelcomeController;
+use app\controllers\AlimentationController;
 use flight\Engine;
 use flight\net\Router;
 //use Flight;
@@ -15,19 +15,16 @@ use flight\net\Router;
 	$app->render('welcome', [ 'message' => 'It works!!' ]);
 });*/
 
+$alimentationController = new AlimentationController();
 
-$Welcome_Controller = new WelcomeController();
 $router->get('/',function (){
     Flight::render('test_nourriture');
 });
 
-//$router->get('/', [ $Welcome_Controller, 'homeLogin' ]);
-$router->get('/home', [ $Welcome_Controller, 'home' ]); 
-$router->get('/login', [ $Welcome_Controller, 'homeLogin' ]); 
-$router->get('/register', [ $Welcome_Controller, 'homeRegister' ]);
-$router->get('/adminConnexion', [ $Welcome_Controller, 'homeAdmin' ]);
 
-
+$router->post('/nourrir',[$alimentationController,'Nourrir']);
+$router->post('/acheter/nourriture',[$alimentationController,'AcheterAlimentation']);
+$router->post('/nourriture',[$alimentationController,'GetAlimentActuel']);
 
 //	Routes des treatments -> ex : /treatment/login
 $router->group('/treatment', function() use ($router) {
