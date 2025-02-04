@@ -21,10 +21,13 @@ $router->get('/',function (){
     Flight::render('test_nourriture');
 });
 
+$router->get('/nourrir',function (){
+    Flight::render('nourrir');
+});
 
 $router->post('/nourrir',[$alimentationController,'Nourrir']);
-$router->post('/acheter/nourriture',[$alimentationController,'AcheterAlimentation']);
-$router->post('/nourriture',[$alimentationController,'GetAlimentActuel']);
+$router->post('/achat/alimentation',[$alimentationController,'AcheterAlimentation']);
+$router->post('/alimentation',[$alimentationController,'GetAlimentActuel']);
 
 //	Routes des treatments -> ex : /treatment/login
 $router->group('/treatment', function() use ($router) {

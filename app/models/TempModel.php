@@ -7,7 +7,7 @@
 
     class TempModel {
 
-        private $db;
+        public $db;
 
         public function __construct($db)
         {
@@ -286,6 +286,20 @@ public function GetCapitalActuel() {
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        public function getEspeceById($idEspece) {
+            $stmt = $this->db->prepare("SELECT * FROM elevage_espece WHERE id_espece = :idEspece");
+            $stmt->execute([':idEspece' => $idEspece]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        public function getAllEspeces() {
+            $stmt = $this->db->query("SELECT id_espece, nom FROM elevage_espece");
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        }
+        public function getDistinctWeightsByEspeceId($idEspece) {
+            $stmt = $this->db->prepare("SELECT DISTINCT poids FROM elevage_achat_animal WHERE id_espece = :idEspece");
+            $stmt->execute([':idEspece' => $idEspece]);
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
     }
 
 ?>
