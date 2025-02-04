@@ -120,19 +120,18 @@
     
 
 
-        public function NourirAnimal($idEspece, $poids, $nbAnimal,$date) {
+        public function NourrirAnimal($idEspece, $poids, $nbAnimal,$date) {
 
             // Get animals of the specified species
+
             $stmt = $this->db->prepare("SELECT id_achat_animal FROM elevage_achat_animal 
                                WHERE id_espece = :idEspece AND poids = :poids ORDER BY date_achat");
-//            $stmt->bindParam(':idEspece', $idEspece, PDO::PARAM_INT);
-//            $stmt->bindParam(':nbAnimal', $nbAnimal, PDO::PARAM_INT);
-//            $stmt->bindParam(':poids', $poids, PDO::PARAM_INT);
 
             $stmt->execute([
                 ':idEspece' => $idEspece,
                 ':poids' => $poids
             ]);
+
             $animals = $stmt->fetchAll(PDO::FETCH_COLUMN);
             try{
                 $animals = array_slice($animals, 0, $nbAnimal);
@@ -143,6 +142,7 @@
 
             // Find matching feed for the species
             // Insert feeding records
+
             $insertStmt = $this->db->prepare("INSERT INTO elevage_nourrissage 
                                    (id_achat_animal, date_nourrissage) VALUES (:animalId, :date)");
             
@@ -214,9 +214,8 @@
         }
     
         //Mety
-        public function AcheterAlimentation($idAlimentation, $quantite) {
-            $date = date('Y-m-d');
-            
+        public function AcheterAlimentation($idAlimentation, $quantite, $date) {
+
             // Get aliment price
             $stmt = $this->db->prepare("SELECT prix FROM elevage_alimentation WHERE id_alimentation = :idAlimentation");
             $stmt->execute([':idAlimentation' => $idAlimentation]);
@@ -281,7 +280,7 @@
     
         public function GetAlimentActuel($date) {
             $stmt = $this->db->prepare("SELECT a.id_alimentation, a.nom, 
-                                      SUM(b.quantite) as total_achatd,
+                                      SUM(b.quantite) as total_achat,
                                       (SELECT COUNT(*) FROM elevage_nourrissage n 
                                        WHERE n.date_nourrissage <= :date) as total_used
                                FROM elevage_alimentation a
@@ -293,6 +292,17 @@
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
+        public function getEspeceById($idEspece) {
+            $stmt = $this->db->prepare("SELECT * FROM elevage_espece WHERE id_espece = :idEspece");
+            $stmt->execute([':idEspece' => $idEspece]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+        
+        public function getDistinctWeightsByEspeceId($idEspece) {
+            $stmt = $this->db->prepare("SELECT DISTINCT poids FROM elevage_achat_animal WHERE id_espece = :idEspece");
+            $stmt->execute([':idEspece' => $idEspece]);
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        }
     }
 
 ?>
