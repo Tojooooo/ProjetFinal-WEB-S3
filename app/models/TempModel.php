@@ -221,6 +221,7 @@
                                WHERE a.id_espece=:espece && a.poids=:poids
                                ORDER BY a.date_achat 
                                LIMIT :nbAnimaux");
+                               
             $stmt->bindParam(':espece', $idEspece, PDO::PARAM_INT);
             $stmt->bindParam(':poids', $poids, PDO::PARAM_INT);
             $stmt->bindParam(':nbAnimaux', $nbAnimaux, PDO::PARAM_INT);

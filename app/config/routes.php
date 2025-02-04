@@ -2,7 +2,7 @@
 
 use app\controllers\WelcomeController;
 use app\controllers\CapitauxController;
-use app\controllers\AlimentationController;
+use app\controllers\AlimentationControlleur;
 use app\controllers\AnimauxController;
 use flight\Engine;
 use flight\net\Router;
@@ -33,6 +33,11 @@ $router->group('/achat', function() use ($router) {
 	$router->get('/animal', [ $AnimauxController, 'formulaireAchat' ]);
 });
 
+$router->group('/achat', function() use ($router) {
+	$AlimentationController = new AlimentationController();
+	$router->get('/achat', [ $AlimentationController, 'formulaireAchat2' ]);
+});
+
 // $router->get('/',function (){
 //     Flight::render('test_nourriture');
 // });
@@ -50,5 +55,12 @@ $router->group('/treatment', function() use ($router) {
 	$router->group('/achat', function() use ($router) {
 		$AnimauxController = new AnimauxController();
 		$router->post('/animal', [ $AnimauxController, 'acheterAnimal' ]);
+	});
+});
+
+$router->group('/treatment2', function() use ($router) {
+	$router->group('/achat', function() use ($router) {
+		$AnimauxController = new AnimauxController();
+		$router->post('/animal', [ $AnimauxController, 'acheterAlimentation' ]);
 	});
 });
