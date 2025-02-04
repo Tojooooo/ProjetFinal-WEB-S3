@@ -1,5 +1,6 @@
 <?php
 
+
 use flight\debug\tracy\TracyExtensionLoader;
 use Tracy\Debugger;
 
