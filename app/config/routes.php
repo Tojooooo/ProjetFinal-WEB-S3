@@ -2,7 +2,7 @@
 
 use app\controllers\WelcomeController;
 use app\controllers\CapitauxController;
-use app\controllers\AlimentationControlleur;
+use app\controllers\AlimentationController;
 use app\controllers\AnimauxController;
 use flight\Engine;
 use flight\net\Router;
@@ -19,6 +19,8 @@ use flight\net\Router;
 
 $CapitauxController = new CapitauxController();
 $WelcomeController = new WelcomeController();
+
+
 $AlimentationController = new AlimentationController();
 $AnimauxController = new AnimauxController();
 
