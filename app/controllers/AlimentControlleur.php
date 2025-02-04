@@ -1,31 +1,35 @@
-<?php 
-namespace App\Controllers;  
-use App\Models\TempModel; 
-use Flight;  
+<?php
+namespace App\Controllers;
 
-class AlimentControlleur { 
-    
-    public function TraiterAcheterAlimentation() {
+use App\Models\TempModel;
+use Flight;
+
+class AlimentationController {
+    public function acheterAlimentation() {
         try {
-            $idAlimentation = (int)Flight::request()->data->id_alimentation;
-            $quantite = (float)Flight::request()->data->quantite;
+            $data = [
+                'id_alimentation' => (int)$_POST['id_alimentation'],
+                'date_achat' => (int)$_POST['date_achat'],
+                'quantite' => (float)$_POST['quantite']
+            ];
 
-            if (empty($idAlimentation) || empty($quantite)) {
-                throw new \InvalidArgumentException('ID alimentation et quantité sont requis');
+            if (empty($data['id_alimentation']) || empty($data['quantite'])) {
+                throw new \InvalidArgumentException('Données manquantes');
             }
 
-            $alimentationModel = new TempModel(Flight::db());
-            $result = $alimentationModel->AcheterAlimentation($idAlimentation, $quantite);
+            $tempModel = new TempModel(Flight::db());
+            $resultat = $tempModel->AcheterAlimentation($data);
 
-            if ($result) {
+            if ($resultat['success']) {
                 Flight::redirect('/accueil');
             } else {
                 Flight::render('/');
+                 
             }
-        } catch (\PDOException $th) {
+        } catch (\InvalidArgumentException $e) {
             return false;
+        
         }
     }
 }
-
 ?>

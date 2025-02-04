@@ -249,31 +249,44 @@
             return $totalvente;
         }
     
-        //Mety
-        public function AcheterAlimentation($idAlimentation, $quantite, $date) {
+        
+        public function AcheterAlimentation($data) {
+            try {
+                $stmt = $this->db->prepare("SELECT prix FROM elevage_alimentation WHERE id_alimentation = :idAlimentation");
+                $stmt->execute([':idAlimentation' => $data['idAlimentation']]);
+                $alimentPrice = $stmt->fetch(PDO::FETCH_ASSOC)['prix'];
+        
+                $argentActuel = $this->GetCapitalSurDate($data['date']);
+        
+                $totalCost = $alimentPrice * $data['quantite'];
+        
+                if ($argentActuel < $totalCost) {
+                    return [
+                        'success' => false,
+                        'message' => 'Fonds insuffisants',
+                        'capital_actuel' => $argentActuel,
+                        'cout_total' => $totalCost
+                    ];
+                }
+                $data_achat = $this->parseUnknownDate($data['data_mouvement']);
 
-            // Get aliment price
-            $stmt = $this->db->prepare("SELECT prix FROM elevage_alimentation WHERE id_alimentation = :idAlimentation");
-            $stmt->execute([':idAlimentation' => $idAlimentation]);
-            $alimentPrice = $stmt->fetch(PDO::FETCH_ASSOC)['prix'];
-            
-            // Insert aliment achat
-            $stmt = $this->db->prepare("INSERT INTO elevage_achat_alimentation 
-                               (id_alimentation, date_achat, quantite) 
-                               VALUES (:idAlimentation, :dateAchat, :quantite)");
-            $stmt->execute([
-                ':idAlimentation' => $idAlimentation,
-                ':dateAchat' => $date,
-                ':quantite' => $quantite
-            ]);
-            
-            // Calculate total achat cost
-            $totalCost = $alimentPrice * $quantite;
-            
-            // Record capital movement
-            $this->InsertionCapitaux(-$totalCost);
-            
-            return $this->db->lastInsertId();
+                $stmt = $this->db->prepare("INSERT INTO elevage_achat_alimentation 
+                    (id_alimentation, date_achat, quantite) 
+                    VALUES (:idAlimentation, :dateAchat, :quantite)");
+                
+                $stmt->execute([
+                    ':id_alimentation' => $data['id_alimentation'],
+                    ':date_achat' => $date_achat,
+                    ':quantite' => $data['quantite']
+                ]);
+        
+        
+                return $stmt;
+                   
+            } catch (\PDOException $th) {
+                return  false;
+                   
+            }
         }
     
         public function CalculAugmentationPoids($date, $idAchatAnimal) {
@@ -339,6 +352,7 @@
             $stmt->execute([':idEspece' => $idEspece]);
             return $stmt->fetchAll(PDO::FETCH_COLUMN);
         }
+
     }
 
 ?>
