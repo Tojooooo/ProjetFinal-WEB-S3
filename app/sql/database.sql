@@ -12,6 +12,7 @@ CREATE TABLE elevage_espece (
     nom VARCHAR(100) NOT NULL,
     poids_min_vente DECIMAL(10,2) NOT NULL,
     prix_vente_kg DECIMAL(10,2) NOT NULL,
+    quota INT NOT NULL,
     poids_max DECIMAL(10,2) NOT NULL,
     jours_sans_manger INT NOT NULL,
     perte_poids_par_jour_sans_manger DECIMAL(5,2) NOT NULL
@@ -54,11 +55,3 @@ CREATE TABLE elevage_achat_alimentation (
     quantite DECIMAL(10,2) NOT NULL,
     FOREIGN KEY (id_alimentation) REFERENCES elevage_alimentation(id_alimentation)
 );
-
-CREATE TABLE elevage_nourrissage (
-    id_nourrissage INT AUTO_INCREMENT PRIMARY KEY,
-    id_achat_animal INT NOT NULL,
-    date_nourrissage DATE NOT NULL,
-    FOREIGN KEY (id_achat_animal) REFERENCES elevage_achat_animal(id_achat_animal)
-);
-

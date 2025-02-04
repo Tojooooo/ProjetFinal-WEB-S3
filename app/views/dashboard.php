@@ -1,3 +1,11 @@
+<?php
+
+    if(!Flight::tempModel()->GetAllCapitaux()) {
+        Flight::redirect("/insererCapital");
+    }
+
+?>
+
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 
@@ -18,26 +26,28 @@
 
 </head>
 
+
 <body>
     <div id="wrapper">
         
         <?php include("frame.php"); ?>
-
+        
         <!-- /. NAV SIDE  -->
         <div id="page-wrapper">
             <div id="page-inner">
-
-
+                
+                
+                <input type="hidden" value="<?= Flight::get('flight.base_url') ?>" id="baseUrl">
                 <div class="row">
                     <div class="col-md-6">
                         <h1 class="page-header">
                             Dashboard 
                             
-                            <small id="pageDate">--/--/--</small>
+                            <small id="pageDate"><?= $date ?></small>
                         </h1>
 						<ol class="breadcrumb">
                             <form id="dateForm" method="post">
-                                <input type="date" name="date">
+                                <input type="date" id="date" name="date">
                                 <input type="submit" value="submit">
                             </form>
                         </ol>
@@ -54,7 +64,7 @@
                                 
                             </div>
                             <div class="panel-right">
-								<h3>8,457</h3>
+								<h3 id="capital"><?= $capital ?></h3>
                                <strong>Capitaux actuels</strong>
                             </div>
                         </div>
@@ -66,19 +76,7 @@
                                 
                             </div>
                             <div class="panel-right">
-								<h3>8,457</h3>
-                               <strong>Nombre d'animaux possédés</strong>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3 col-sm-12 col-xs-12">
-                        <div class="panel panel-primary text-center no-boder bg-color-green green">
-                            <div class="panel-left pull-left green">
-                                <i class="fa fa-eye fa-5x"></i>
-                                
-                            </div>
-                            <div class="panel-right">
-								<h3>8,457</h3>
+								<h3 id="nbAchetes"><?= $nbAchetes ?></h3>
                                <strong>Nombre d'animaux achetés</strong>
                             </div>
                         </div>
@@ -90,7 +88,7 @@
                                 
                             </div>
                             <div class="panel-right">
-								<h3>8,457</h3>
+								<h3 id="nbVendus"><?= $nbVendus ?></h3>
                                <strong>Nombre d'animaux vendus</strong>
                             </div>
                         </div>
@@ -102,8 +100,8 @@
 			<div class="col-xs-6 col-md-6">
 				<div class="panel panel-default">
 					<div class="panel-body easypiechart-panel">
-						<h4>pourcentage alimentation animaux</h4>
-						<div class="easypiechart" id="easypiechart-blue" data-percent="82" ><span class="percent">82%</span>
+						<h4 id="pourcentage_vente">pourcentage de ventes </h4>
+						<div class="easypiechart" id="easypiechart-blue" data-percent="<?= $pourcentage_vente ?>" ><span class="percent"><?= $pourcentage_vente ?>%</span>
 						</div>
 					</div>
 				</div>
@@ -111,8 +109,8 @@
 			<div class="col-xs-6 col-md-6">
 				<div class="panel panel-default">
 					<div class="panel-body easypiechart-panel">
-						<h4>pourcentage décès animaux</h4>
-						<div class="easypiechart" id="easypiechart-orange" data-percent="55" ><span class="percent">55%</span>
+						<h4 id="pourcentage_mort">pourcentage décès animaux</h4>
+						<div class="easypiechart" id="easypiechart-orange" data-percent="<?= $pourcentage_mort ?>" ><span class="percent"><?= $pourcentage_mort ?>%</span>
 						</div>
 					</div>
 				</div>
@@ -128,27 +126,12 @@
                     </div>
                     <div class="panel-body">
                         <div class="list-group">
-
+                        <?php foreach($animauxParEspeces as $espece) { ?>
                             <a href="#" class="list-group-item">
-                                <span class="badge">60</span>
-                                <i class="fa fa-fw fa-comment"></i> Boeuf
+                                <span class="badge"><?= $espece["nombre"] ?></span>
+                                <i class="fa fa-fw fa-comment"></i> <?= $espece["nom"] ?>
                             </a>
-                            <a href="#" class="list-group-item">
-                                <span class="badge">12</span>
-                                <i class="fa fa-fw fa-truck"></i> Porc
-                            </a>
-                            <a href="#" class="list-group-item">
-                                <span class="badge">1</span>
-                                <i class="fa fa-fw fa-globe"></i> Raphaël
-                            </a>
-                            <a href="#" class="list-group-item">
-                                <span class="badge">28</span>
-                                <i class="fa fa-fw fa-user"></i> Poule
-                            </a>
-                            <a href="#" class="list-group-item">
-                                <span class="badge">31</span>
-                                <i class="fa fa-fw fa-user"></i> Canard
-                            </a>
+                        <?php } ?>
                         </div>
                         <div class="text-right">
                             <a href="#">More Tasks <i class="fa fa-arrow-circle-right"></i></a>
@@ -180,8 +163,8 @@
                                 </thead>
                                 <tbody>
                                     <?php
-                                        if(isset($data)) {
-                                            foreach($data as $espece) { ?>
+                                        if(isset($especes)) {
+                                            foreach($especes as $espece) { ?>
                                     <tr>
                                         <td><?= $espece["id_espece"] ?></td>
                                         <td><?= $espece["nom"] ?></td>
@@ -241,51 +224,76 @@
     <script src="assets/js/dynamic/home-script.js"></script>
 
     <script>
-        // Fonction pour formater la date en JJ/MM/AA
-        function formatDate(date) {
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = String(date.getFullYear()).slice(-2);
-            return `${day}/${month}/${year}`;
-        }
+document.addEventListener('DOMContentLoaded', function() {
+    // Récupération de l'URL de base
+    const baseUrl = document.getElementById('baseUrl').value;
 
-        // Mettre la date actuelle au chargement de la page
-        document.addEventListener('DOMContentLoaded', function() {
-            const today = new Date();
-            document.getElementById('pageDate').textContent = formatDate(today);
-            
-            // Mettre la date actuelle dans l'input date
-            const dateInput = document.querySelector('input[type="date"]');
-            dateInput.valueAsDate = today;
-        });
+    // Sélection des éléments du DOM
+    const dateForm = document.getElementById('dateForm');
+    const dateInput = document.getElementById('date');
+    const pageDate = document.getElementById('pageDate');
 
-        // Gérer la soumission du formulaire
-        document.getElementById('dateForm').addEventListener('submit', function(e) {
-            e.preventDefault(); // Empêcher le rechargement de la page
-            
-            const formData = new FormData(this);
-            const selectedDate = new Date(formData.get('date'));
-            
-            // Mettre à jour l'affichage de la date
-            document.getElementById('pageDate').textContent = formatDate(selectedDate);
-            
-            // Envoyer la date au serveur via Ajax
-            fetch('fetch-data-from-date.php', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Traiter les données reçues du serveur
-                console.log('Données reçues:', data);
-                // Ici vous pouvez ajouter le code pour utiliser les données
-                // Par exemple : mettre à jour d'autres éléments de la page
-            })
-            .catch(error => {
-                console.error('Erreur:', error);
-            });
+    // Fonction pour formater la date au format YYYY-MM-DD
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Les mois commencent à 0
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Afficher la date d'aujourd'hui par défaut
+    const today = new Date();
+    const todayFormatted = formatDate(today);
+    pageDate.textContent = todayFormatted; // Afficher la date d'aujourd'hui
+    dateInput.value = todayFormatted; // Remplir l'input de type date avec la date d'aujourd'hui
+
+    // Écoute de l'événement de soumission du formulaire
+    dateForm.addEventListener('submit', function(event) {
+        // Empêche le rechargement de la page
+        event.preventDefault();
+
+        // Récupération de la date saisie
+        const selectedDate = dateInput.value;
+
+        // Affichage de la date dans l'élément <small id="pageDate">
+        pageDate.textContent = selectedDate;
+
+        // Envoi de la requête AJAX pour récupérer des données depuis une autre page PHP
+        fetch(`${baseUrl}/rafraichir`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `date=${encodeURIComponent(selectedDate)}` // Envoyer la date sous forme de chaîne de caractères
+        })
+        .then(response => response.json()) // Supposons que la réponse est en JSON
+        .then(data => {
+            console.log('Données reçues:', data);
+            var capital = document.getElementById("capital");
+            capital.innerHTML = "";
+            capital.innerHTML += data.capital;
+            var nbAchetes = document.getElementById("nbAchetes");
+            nbAchetes.innerHTML = "";
+            nbAchetes.innerHTML += data.nbAchetes;
+            var nbVendus = document.getElementById("nbVendus");
+            nbAchetes.innerHTML = "";
+            nbAchetes.innerHTML += data.nbAchetes;
+            var animauxParEspeces = document.getElementById("animauxParEspeces");
+            animauxParEspeces.innerHTML = "";
+            animauxParEspeces.innerHTML += data.animauxParEspeces;
+            var pourcentage_vente = document.getElementById("pourcentage_vente");
+            pourcentage_vente.innerHTML = "";
+            pourcentage_vente.innerHTML += data.pourcentage_vente;
+            var pourcentage_mort = document.getElementById("pourcentage_mort");
+            pourcentage_mort.innerHTML = "";
+            pourcentage_mort.innerHTML += data.pourcentage_mort;
+        })
+        .catch(error => {
+            console.error('Erreur lors de la récupération des données:', error);
         });
-    </script>
+    });
+});
+</script>
  
 
 </body>

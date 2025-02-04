@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 use app\models\ProductModel;
+use PDO;
 use Flight;
 
 class WelcomeController {
@@ -46,9 +47,33 @@ class WelcomeController {
         ]);
     }
 
+    public function refreshDate()
+    {
+        $date = $_POST["date"];
+        $data = array();
+        $data["capital"] = Flight::tempModel()->GetCapitalSurDate($date);
+        $data["nbAchetes"] = Flight::tempModel()->getNombreAnimauxAchetes($date);
+        $data["nbVendus"] = Flight::tempModel()->getNombreAnimauxVendus($date);
+        $data["animauxParEspeces"] = Flight::tempModel()->getNombreAnimauxParEspece($date);
+        $data["pourcentage_vente"] = Flight::tempModel()->getSoldPercentage($date);
+        $data["pourcentage_mort"] = Flight::tempModel()->getSoldPercentage($date);
+        header('Content-Type: application/json');
+        echo json_encode($data);
+    }
+
     public function dashboard()
     {
-        $data = Flight::tempModel()->GetAllEspeces();
+        $date = "2025/02/04";
+        $data = array();
+        $data["date"] = $date;
+        $data["especes"] = Flight::tempModel()->GetAllEspeces();
+        $data["capital"] = Flight::tempModel()->GetCapitalSurDate($date);
+        $data["nbAchetes"] = Flight::tempModel()->getNombreAnimauxAchetes($date);
+        $data["nbVendus"] = Flight::tempModel()->getNombreAnimauxVendus($date);
+        $data["animauxParEspeces"] = Flight::tempModel()->getNombreAnimauxParEspece($date);
+        $data["pourcentage_vente"] = Flight::tempModel()->getSoldPercentage($date);
+        $data["pourcentage_mort"] = Flight::tempModel()->getSoldPercentage($date);
+
         Flight::render("dashboard", $data);
     }
 

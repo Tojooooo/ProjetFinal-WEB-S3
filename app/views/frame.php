@@ -20,7 +20,7 @@
                 <a class="active-menu" href="<?= Flight::get('flight.base_url') ?>/"><i class="fa fa-dashboard"></i> Dashboard</a>
             </li>
             <li>
-                <a href="#"><i class="fa fa-desktop"></i>Insérer capitaux</a>
+                <a href="<?= Flight::get("flight.base_url") ?>/insererCapital"><i class="fa fa-desktop"></i>Insérer capitaux</a>
             </li>
             <li>
                 <a href="<?= Flight::get('flight.base_url') ?>/possession"><i class="fa fa-qrcode"></i>Espèces possédées</a>

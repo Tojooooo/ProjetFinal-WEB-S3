@@ -1,9 +1,9 @@
 -- Insertion des espèces
-INSERT INTO elevage_espece (nom, poids_min_vente, prix_vente_kg, poids_max, jours_sans_manger, perte_poids_par_jour_sans_manger) VALUES
-('Boeuf', 300.00, 5.50, 800.00, 7, 2.00),
-('Porc', 100.00, 4.00, 300.00, 5, 1.50),
-('Poule', 1.50, 10.00, 5.00, 3, 0.50),
-('Canard', 2.50, 8.00, 6.00, 4, 0.75);
+INSERT INTO elevage_espece (nom, poids_min_vente, prix_vente_kg, poids_max, quota, jours_sans_manger, perte_poids_par_jour_sans_manger) VALUES
+('Boeuf', 300.00, 5.50, 800.00, 1, 7, 2.00),
+('Porc', 100.00, 4.00, 300.00, 1, 5, 1.50),
+('Poule', 1.50, 10.00, 5.00, 3, 3, 0.50),
+('Canard', 2.50, 8.00, 6.00, 4, 2, 0.75);
 
 -- Insertion des types d'alimentation
 INSERT INTO elevage_alimentation (nom, prix, pourcentage_gain) VALUES
